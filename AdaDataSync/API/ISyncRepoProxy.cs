@@ -1,0 +1,12 @@
+﻿using System.Collections.Generic;
+
+namespace AdaDataSync.API
+{
+	public interface ISyncRepoProxy
+	{
+		List<DataTransactionInfo> BekleyenTransactionlariAl();
+		Kayit KaynaktanTekKayitAl(DataTransactionInfo transactionInfo);
+		void HedeftenKayitSil(DataTransactionInfo transactionInfo);
+		void HedefteInsertVeyaUpdate(Kayit kaynaktakiKayit);
+	}
+}
