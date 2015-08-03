@@ -10,6 +10,9 @@ namespace AdaDataSync
 	{
 		static void Main(string[] args)
 		{
+            // deneme commit
+
+
 		}
 	}
 }
