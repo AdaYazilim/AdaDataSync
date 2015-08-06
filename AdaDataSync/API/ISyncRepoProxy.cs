@@ -8,8 +8,7 @@ namespace AdaDataSync.API
 		Kayit KaynaktanTekKayitAl(DataTransactionInfo transactionInfo);
 		void HedeftenKayitSil(DataTransactionInfo transactionInfo);
 		void HedefteInsertVeyaUpdate(Kayit kaynaktakiKayit);
-
-
-
+		void TransactionLogKayitSil(DataTransactionInfo transactionLog);
+		void TransactionLogKaydinaHataMesajiYaz(DataTransactionInfo transactionLog, string hataMesaji);
 	}
 }

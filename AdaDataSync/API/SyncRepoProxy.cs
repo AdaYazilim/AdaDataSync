@@ -40,5 +40,15 @@ namespace AdaDataSync.API
 		{
 			throw new NotImplementedException();
 		}
+
+		public void TransactionLogKayitSil(DataTransactionInfo transactionLog)
+		{
+			throw new NotImplementedException();
+		}
+
+		public void TransactionLogKaydinaHataMesajiYaz(DataTransactionInfo transactionLog, string hataMesaji)
+		{
+			throw new NotImplementedException();
+		}
 	}
 }

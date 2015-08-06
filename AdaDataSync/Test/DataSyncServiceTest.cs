@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using AdaDataSync.API;
 using NSubstitute;
 using NUnit.Framework;
@@ -10,6 +11,7 @@ namespace AdaDataSync.Test
 	{
 		private ISyncRepoProxy _repoProxy;
 		private ICalisanServisKontrolcusu _servisKontrolcusu;
+		private ISafetyNetLogger _ikincilLogger;
 		private DataSyncService _service;
 
 		[SetUp]
@@ -17,7 +19,8 @@ namespace AdaDataSync.Test
 		{
 			_repoProxy = Substitute.For<ISyncRepoProxy>();
 			_servisKontrolcusu = Substitute.For<ICalisanServisKontrolcusu>();
-			_service = new DataSyncService(_repoProxy, _servisKontrolcusu);
+			_ikincilLogger = Substitute.For<ISafetyNetLogger>();
+			_service = new DataSyncService(_repoProxy, _servisKontrolcusu, _ikincilLogger);
 		}
 
 		[Test]
@@ -66,6 +69,73 @@ namespace AdaDataSync.Test
 			_servisKontrolcusu.Received().MakinaBazindaKilitKoy();
 		}
 
+		[Test]
+		public void hedefte_islem_basariyla_yapildiktan_sonra_transaction_logdan_kaydi_siler()//insert veya update
+		{
+			//given
+			List<DataTransactionInfo> ornekTransactionLogKayitlari = ornekTransactionLogKayitlariYarat(1);
+			_repoProxy.BekleyenTransactionlariAl().Returns(ornekTransactionLogKayitlari);//kaynakta transaction logda tek kayıt var
+			Kayit kaynaktakiKayit = new Kayit();
+			_repoProxy.KaynaktanTekKayitAl(null).ReturnsForAnyArgs(kaynaktakiKayit);//kaynakta kayıt olduğunu simule ediyorum
+
+			//when
+			_service.Sync();
+
+			//then
+			_repoProxy.Received(1).TransactionLogKayitSil(ornekTransactionLogKayitlari[0]);
+		}
+
+		[Test]
+		public void hedefte_islem_basarisiz_olursa_transaction_log_kaydi_silinmez_hata_mesaji_eklenir()//insert veya update
+		{
+			//given
+			List<DataTransactionInfo> ornekTransactionLogKayitlari = ornekTransactionLogKayitlariYarat(1);
+			_repoProxy.BekleyenTransactionlariAl().Returns(ornekTransactionLogKayitlari);//kaynakta transaction logda tek kayıt var
+			Kayit kaynaktakiKayit = new Kayit();
+			_repoProxy.KaynaktanTekKayitAl(null).ReturnsForAnyArgs(kaynaktakiKayit);//kaynakta kayıt olduğunu simule ediyorum
+			_repoProxy.
+				When(proxy => proxy.HedefteInsertVeyaUpdate(kaynaktakiKayit)).
+				Do(x => { throw new Exception("Hedefte güncellerken hata oluştu"); });
+
+			//when
+			_service.Sync();
+
+			//then
+			_repoProxy.ReceivedWithAnyArgs(1).TransactionLogKaydinaHataMesajiYaz(ornekTransactionLogKayitlari[0], "");
+		}
+
+		[Test]
+		public void kaynaktan_transaction_log_alinirken_hata_olursa_dosya_sistemine_logla()
+		{
+			_repoProxy.When(proxy => proxy.BekleyenTransactionlariAl()).Do(x => { throw new Exception("Transaction log alınamıyor"); });
+
+			_service.Sync();
+
+			_ikincilLogger.ReceivedWithAnyArgs(1).HataLogla(null);
+		}
+
+		[Test]
+		public void hedefte_islem_yaparken_hata_alinir_bu_hata_loglanirkende_hata_alinirsa_dosya_sistemine_logla()
+		{
+			//given
+			List<DataTransactionInfo> ornekTransactionLogKayitlari = ornekTransactionLogKayitlariYarat(1);
+			_repoProxy.BekleyenTransactionlariAl().Returns(ornekTransactionLogKayitlari);//kaynakta transaction logda tek kayıt var
+			Kayit kaynaktakiKayit = new Kayit();
+			_repoProxy.KaynaktanTekKayitAl(null).ReturnsForAnyArgs(kaynaktakiKayit);//kaynakta kayıt olduğunu simule ediyorum
+			_repoProxy.
+				When(proxy => proxy.HedefteInsertVeyaUpdate(kaynaktakiKayit)).
+				Do(x => { throw new Exception("Hedefte güncellerken hata oluştu"); });
+			_repoProxy.
+				WhenForAnyArgs(proxy => proxy.TransactionLogKaydinaHataMesajiYaz(null, null)).
+				Do(x => { throw new Exception("Transaction loga hata yazarken hata oluştu"); });
+
+			//when
+			_service.Sync();
+
+			//then
+			_ikincilLogger.ReceivedWithAnyArgs(1).HataLogla(null);
+		}
+
 		//[Test]
 		//public void senkronizasyon_sonrasi_transaction_log_silinir()
 		//{
@@ -76,6 +146,15 @@ namespace AdaDataSync.Test
 		//	_repoProxy.Received().KaynaktanTransactionSil(transaction);
 		//}
 
+		private static List<DataTransactionInfo> ornekTransactionLogKayitlariYarat(int adet)
+		{
+
+			List<DataTransactionInfo> kayitlar = new List<DataTransactionInfo>();
+			for (int i = 0; i < adet; i++)
+				kayitlar.Add(new DataTransactionInfo());
+			return kayitlar;
+		}
+
 		private DataTransactionInfo tekTransactionluTestOrtamiHazirla(Kayit kaynaktakiKayit = null)
 		{
 			DataTransactionInfo transactionInfo = new DataTransactionInfo();
@@ -84,4 +163,10 @@ namespace AdaDataSync.Test
 			return transactionInfo;
 		}
 	}
+
+	public interface ISafetyNetLogger
+	{
+		void HataLogla(Exception exception);
+	}
+
 }
