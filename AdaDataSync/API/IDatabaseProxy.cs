@@ -2,7 +2,7 @@
 
 namespace AdaDataSync.API
 {
-	public interface ISyncRepoProxy
+	public interface IDatabaseProxy
 	{
 		List<DataTransactionInfo> BekleyenTransactionlariAl();
 		Kayit KaynaktanTekKayitAl(DataTransactionInfo transactionInfo);

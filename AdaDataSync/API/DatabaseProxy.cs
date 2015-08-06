@@ -6,12 +6,12 @@ using AdaVeriKatmani;
 
 namespace AdaDataSync.API
 {
-	public class SyncRepoProxy : ISyncRepoProxy
+	public class DatabaseProxy : IDatabaseProxy
 	{
 		private readonly ITemelVeriIslemleri _kaynakVeriIslemleri;
 		private readonly ITemelVeriIslemleri _hedefVeriIslemleri;
 
-		public SyncRepoProxy(ITemelVeriIslemleri kaynakVeriIslemleri, ITemelVeriIslemleri hedefVeriIslemleri)
+		public DatabaseProxy(ITemelVeriIslemleri kaynakVeriIslemleri, ITemelVeriIslemleri hedefVeriIslemleri)
 		{
 			_kaynakVeriIslemleri = kaynakVeriIslemleri;
 			_hedefVeriIslemleri = hedefVeriIslemleri;

@@ -5,13 +5,13 @@ namespace AdaDataSync.API
 {
 	public class DataSyncService
 	{
-		private readonly ISyncRepoProxy _repoProxy;
+		private readonly IDatabaseProxy _dbProxy;
 		private readonly ICalisanServisKontrolcusu _servisKontrolcusu;
 		private readonly ISafetyNetLogger _ikincilLogger;
 
-		public DataSyncService(ISyncRepoProxy repoProxy, ICalisanServisKontrolcusu servisKontrolcusu, ISafetyNetLogger ikincilLogger)
+		public DataSyncService(IDatabaseProxy dbProxy, ICalisanServisKontrolcusu servisKontrolcusu, ISafetyNetLogger ikincilLogger)
 		{
-			_repoProxy = repoProxy;
+			_dbProxy = dbProxy;
 			_servisKontrolcusu = servisKontrolcusu;
 			_ikincilLogger = ikincilLogger;
 		}
@@ -25,22 +25,15 @@ namespace AdaDataSync.API
 
 			try
 			{
-				_repoProxy.BekleyenTransactionlariAl().ForEach(logKaydi =>
+				_dbProxy.BekleyenTransactionlariAl().ForEach(logKaydi =>
 				{
 					try
 					{
-						Kayit kaynaktakiKayit = _repoProxy.KaynaktanTekKayitAl(logKaydi);
-
-						if (kaynaktakiKayit == null)
-							_repoProxy.HedeftenKayitSil(logKaydi);
-						else
-							_repoProxy.HedefteInsertVeyaUpdate(kaynaktakiKayit);
-
-						_repoProxy.TransactionLogKayitSil(logKaydi);
+						tekLogKaydiniIsle(logKaydi);
 					}
 					catch (Exception ex)
 					{
-						_repoProxy.TransactionLogKaydinaHataMesajiYaz(logKaydi, ex.Message);
+						_dbProxy.TransactionLogKaydinaHataMesajiYaz(logKaydi, ex.Message);
 					}
 				});
 			}
@@ -48,6 +41,18 @@ namespace AdaDataSync.API
 			{
 				_ikincilLogger.HataLogla(ex);
 			}
+		}
+
+		private void tekLogKaydiniIsle(DataTransactionInfo logKaydi)
+		{
+			Kayit kaynaktakiKayit = _dbProxy.KaynaktanTekKayitAl(logKaydi);
+
+			if (kaynaktakiKayit == null)
+				_dbProxy.HedeftenKayitSil(logKaydi);
+			else
+				_dbProxy.HedefteInsertVeyaUpdate(kaynaktakiKayit);
+
+			_dbProxy.TransactionLogKayitSil(logKaydi);
 		}
 	}
 }

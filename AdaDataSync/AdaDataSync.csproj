@@ -54,11 +54,12 @@
     <Compile Include="Test\DataSyncServiceTest.cs" />
     <Compile Include="API\DataTransactionInfo.cs" />
     <Compile Include="API\ICalisanServisKontrolcusu.cs" />
-    <Compile Include="API\ISyncRepoProxy.cs" />
+    <Compile Include="API\IDatabaseProxy.cs" />
     <Compile Include="API\Kayit.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="API\SyncRepoProxy.cs" />
+    <Compile Include="API\DatabaseProxy.cs" />
+    <Compile Include="Test\ISafetyNetLogger.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
