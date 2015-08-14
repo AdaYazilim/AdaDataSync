@@ -7,7 +7,7 @@ namespace AdaDataSync.API
 		List<DataTransactionInfo> BekleyenTransactionlariAl();
 		Kayit KaynaktanTekKayitAl(DataTransactionInfo transactionInfo);
 		void HedeftenKayitSil(DataTransactionInfo transactionInfo);
-		void HedefteInsertVeyaUpdate(Kayit kaynaktakiKayit);
+		void HedefteInsertVeyaUpdate(Kayit kaynaktakiKayit, DataTransactionInfo transactionInfo);
 		void TransactionLogKayitSil(DataTransactionInfo transactionLog);
 		void TransactionLogKaydinaHataMesajiYaz(DataTransactionInfo transactionLog, string hataMesaji);
 	}

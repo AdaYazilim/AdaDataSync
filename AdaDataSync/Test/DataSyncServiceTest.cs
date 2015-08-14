@@ -23,6 +23,16 @@ namespace AdaDataSync.Test
 			_service = new DataSyncService(_dbProxy, _servisKontrolcusu, _ikincilLogger);
 		}
 
+		/*
+			senkronize ederken sql metadatayı da düzelt
+			belirli zaman aralıklarında çalışmalı
+			trlog çok kayıt içeriyorsa her seferinde ilk belirli bir sayıda kayıt alınmalı
+			sql tablosunun primary keye sahip olduğu assert edilebilir.
+			1'den fazla veritabanı çifti için aynı program hepsi için sync etmeli
+		 * configdeki bağlantılar geçerli mi?
+		 * 
+		 */
+
 		[Test]
 		public void kaynakta_kayit_yoksa_hedeften_siler()
 		{
@@ -42,7 +52,7 @@ namespace AdaDataSync.Test
 
 			_service.Sync();
 
-			_dbProxy.Received().HedefteInsertVeyaUpdate(kaynaktakiKayit);
+			_dbProxy.Received().HedefteInsertVeyaUpdate(kaynaktakiKayit, Arg.Any<DataTransactionInfo>());
 		}
 
 		[Test]		
@@ -94,7 +104,7 @@ namespace AdaDataSync.Test
 			Kayit kaynaktakiKayit = new Kayit();
 			_dbProxy.KaynaktanTekKayitAl(null).ReturnsForAnyArgs(kaynaktakiKayit);//kaynakta kayıt olduğunu simule ediyorum
 			_dbProxy.
-				When(proxy => proxy.HedefteInsertVeyaUpdate(kaynaktakiKayit)).
+				When(proxy => proxy.HedefteInsertVeyaUpdate(kaynaktakiKayit, Arg.Any<DataTransactionInfo>())).
 				Do(x => { throw new Exception("Hedefte güncellerken hata oluştu"); });
 
 			//when
@@ -105,7 +115,7 @@ namespace AdaDataSync.Test
 		}
 
 		[Test]
-		public void kaynaktan_transaction_log_alinirken_hata_olursa_dosya_sistemine_logla()
+		public void kaynaktan_transaction_log_alinirken_hata_olursa_ikincil_loggera_gonder()//örneğin dosya sistemi
 		{
 			_dbProxy.When(proxy => proxy.BekleyenTransactionlariAl()).Do(x => { throw new Exception("Transaction log alınamıyor"); });
 
@@ -115,7 +125,7 @@ namespace AdaDataSync.Test
 		}
 
 		[Test]
-		public void hedefte_islem_yaparken_hata_alinir_bu_hata_loglanirkende_hata_alinirsa_dosya_sistemine_logla()
+		public void hedefte_islem_yaparken_hata_alinir_bu_hata_loglanirkende_hata_alinirsa_ikincil_loggera_gonder()//örneğin dosya sistemi
 		{
 			//given
 			List<DataTransactionInfo> ornekTransactionLogKayitlari = ornekTransactionLogKayitlariYarat(1);
@@ -123,7 +133,7 @@ namespace AdaDataSync.Test
 			Kayit kaynaktakiKayit = new Kayit();
 			_dbProxy.KaynaktanTekKayitAl(null).ReturnsForAnyArgs(kaynaktakiKayit);//kaynakta kayıt olduğunu simule ediyorum
 			_dbProxy.
-				When(proxy => proxy.HedefteInsertVeyaUpdate(kaynaktakiKayit)).
+				When(proxy => proxy.HedefteInsertVeyaUpdate(kaynaktakiKayit, Arg.Any<DataTransactionInfo>())).
 				Do(x => { throw new Exception("Hedefte güncellerken hata oluştu"); });
 			_dbProxy.
 				WhenForAnyArgs(proxy => proxy.TransactionLogKaydinaHataMesajiYaz(null, null)).
@@ -135,6 +145,9 @@ namespace AdaDataSync.Test
 			//then
 			_ikincilLogger.ReceivedWithAnyArgs(1).HataLogla(null);
 		}
+
+		//[Test]
+		//public void 
 
 		private static List<DataTransactionInfo> ornekTransactionLogKayitlariYarat(int adet)
 		{
@@ -152,5 +165,7 @@ namespace AdaDataSync.Test
 			_dbProxy.KaynaktanTekKayitAl(transactionInfo).Returns(kaynaktakiKayit);
 			return transactionInfo;
 		}
+
+
 	}
 }

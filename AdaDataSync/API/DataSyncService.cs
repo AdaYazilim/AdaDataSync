@@ -50,7 +50,7 @@ namespace AdaDataSync.API
 			if (kaynaktakiKayit == null)
 				_dbProxy.HedeftenKayitSil(logKaydi);
 			else
-				_dbProxy.HedefteInsertVeyaUpdate(kaynaktakiKayit);
+				_dbProxy.HedefteInsertVeyaUpdate(kaynaktakiKayit, logKaydi);
 
 			_dbProxy.TransactionLogKayitSil(logKaydi);
 		}
