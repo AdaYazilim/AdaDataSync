@@ -14,7 +14,8 @@ namespace AdaDataSync
 	{
 		static void Main(string[] args)
 		{
-			string foxproString = ConfigurationManager.AppSettings["VfpBaglantiString"];
+            //
+            string foxproString = ConfigurationManager.AppSettings["VfpBaglantiString"];
 			string sqlString = ConfigurationManager.AppSettings["SqlBaglantiString"];
 			TemelVeriIslemleri tviKaynak = new TemelVeriIslemleri(VeritabaniTipi.FoxPro, foxproString);
 			TemelVeriIslemleri tviHedef = new TemelVeriIslemleri(VeritabaniTipi.SqlServer, sqlString);
