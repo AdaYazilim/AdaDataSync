@@ -50,7 +50,7 @@ namespace AdaDataSync.API
 
 		public List<DataTransactionInfo> BekleyenTransactionlariAl()
 		{
-			DataTable dt = _kaynakVeriIslemleri.SelectTop("trlog", 1000);
+			DataTable dt = _kaynakVeriIslemleri.SelectTop("trlog", 10000);
 			return (from DataRow dr in dt.Rows select DataTransactionInfo.Yarat(dr)).ToList();
 		}
 

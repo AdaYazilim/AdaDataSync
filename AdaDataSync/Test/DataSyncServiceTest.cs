@@ -36,7 +36,7 @@ namespace AdaDataSync.Test
 		[Test]
 		public void kaynakta_kayit_yoksa_hedeften_siler()
 		{
-			var transaction = tekTransactionluTestOrtamiHazirla();
+			DataTransactionInfo transaction = tekTransactionluTestOrtamiHazirla(null);
 
 			_service.Sync();
 
@@ -58,7 +58,7 @@ namespace AdaDataSync.Test
 		[Test]		
 		public void calisan_baska_bir_servis_varsa_hic_islem_yapmaz()
 		{
-			tekTransactionluTestOrtamiHazirla();
+			tekTransactionluTestOrtamiHazirla(null);
 
 			_servisKontrolcusu.BuMakinadaBaskaServisCalisiyorMu().Returns(true);
 
@@ -70,7 +70,7 @@ namespace AdaDataSync.Test
 		[Test]
 		public void calisan_baska_bir_servis_yoksa_global_lock_koyar()
 		{
-			tekTransactionluTestOrtamiHazirla();
+			tekTransactionluTestOrtamiHazirla(null);
 
 			_servisKontrolcusu.BuMakinadaBaskaServisCalisiyorMu().Returns(false);
 
@@ -158,7 +158,7 @@ namespace AdaDataSync.Test
 			return kayitlar;
 		}
 
-		private DataTransactionInfo tekTransactionluTestOrtamiHazirla(Kayit kaynaktakiKayit = null)
+		private DataTransactionInfo tekTransactionluTestOrtamiHazirla(Kayit kaynaktakiKayit)
 		{
 			DataTransactionInfo transactionInfo = new DataTransactionInfo();
 			_dbProxy.BekleyenTransactionlariAl().Returns(new List<DataTransactionInfo> {transactionInfo});
