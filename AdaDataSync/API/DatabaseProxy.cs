@@ -50,7 +50,15 @@ namespace AdaDataSync.API
             //DataTable dt = _kaynakVeriIslemleri.SelectTop("trlog", 10000);
 		    DataTable dt = _kaynakVeriIslemleri.TransactionIciDoldur("select top " + kayitSayisi + " * from trlog order by oncekitur desc, fprktrlog2");
 
-			return (from DataRow dr in dt.Rows select new DataTransactionInfo(dr)).ToList();
+			return (from DataRow dr in dt.Rows 
+                    select new DataTransactionInfo
+                        (
+                        (int)dr["fprktrlog2"],
+                        dr["dosyaadi"].ToString().Trim().ToLowerInvariant(),
+                        dr["prkalanadi"].ToString().Trim().ToLowerInvariant(),
+                        (int)dr["prkdeger"]
+                        )
+                   ).ToList();
 		}
 
 		public Kayit KaynaktanTekKayitAl(DataTransactionInfo transactionInfo)

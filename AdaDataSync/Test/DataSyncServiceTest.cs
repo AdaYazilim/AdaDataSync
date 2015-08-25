@@ -45,48 +45,49 @@ namespace AdaDataSync.Test
 			_dbProxy.Received().HedeftenKayitSil(transaction);
 		}
 
+        [Test]
+        public void kaynakta_kayit_varsa_hedefe_kaydi_gonder()
+        {
+            Kayit kaynaktakiKayit = new Kayit(null);
+            tekTransactionluTestOrtamiHazirla(kaynaktakiKayit);
 
-		[Test]
-		public void kaynakta_kayit_varsa_hedefe_kaydi_gonder()
-		{
-			Kayit kaynaktakiKayit = new Kayit(null);
-			tekTransactionluTestOrtamiHazirla(kaynaktakiKayit);
+            _service.Sync();
 
-			_service.Sync();
+            _dbProxy.Received().HedefteInsertVeyaUpdate(kaynaktakiKayit, Arg.Any<DataTransactionInfo>());
+        }
 
-			_dbProxy.Received().HedefteInsertVeyaUpdate(kaynaktakiKayit, Arg.Any<DataTransactionInfo>());
-		}
+        // başkasının işi. başka classın testi
+        //[Test]		
+        //public void calisan_baska_bir_servis_varsa_hic_islem_yapmaz()
+        //{
+        //    tekTransactionluTestOrtamiHazirla(null);
 
-		[Test]		
-		public void calisan_baska_bir_servis_varsa_hic_islem_yapmaz()
-		{
-			tekTransactionluTestOrtamiHazirla(null);
+        //    _servisKontrolcusu.BuMakinadaBaskaServisCalisiyorMu().Returns(true);
 
-			_servisKontrolcusu.BuMakinadaBaskaServisCalisiyorMu().Returns(true);
+        //    _service.Sync();
 
-			_service.Sync();
+        //    _dbProxy.DidNotReceiveWithAnyArgs().BekleyenTransactionlariAl(1000);
+        //}
 
-			_dbProxy.DidNotReceiveWithAnyArgs().BekleyenTransactionlariAl(1000);
-		}
+        // başkasının işi. başka classın testi
+        //[Test]
+        //public void calisan_baska_bir_servis_yoksa_global_lock_koyar()
+        //{
+        //    tekTransactionluTestOrtamiHazirla(null);
 
-		[Test]
-		public void calisan_baska_bir_servis_yoksa_global_lock_koyar()
-		{
-			tekTransactionluTestOrtamiHazirla(null);
+        //    _servisKontrolcusu.BuMakinadaBaskaServisCalisiyorMu().Returns(false);
 
-			_servisKontrolcusu.BuMakinadaBaskaServisCalisiyorMu().Returns(false);
+        //    _service.Sync();
 
-			_service.Sync();
-
-			_servisKontrolcusu.Received().MakinaBazindaKilitKoy();
-		}
+        //    _servisKontrolcusu.Received().MakinaBazindaKilitKoy();
+        //}
 
 		[Test]
 		public void hedefte_islem_basariyla_yapildiktan_sonra_transaction_logdan_kaydi_siler()//insert veya update
 		{
 			//given
 			List<DataTransactionInfo> ornekTransactionLogKayitlari = ornekTransactionLogKayitlariYarat(1);
-			_dbProxy.BekleyenTransactionlariAl(1000).Returns(ornekTransactionLogKayitlari);//kaynakta transaction logda tek kayıt var
+			_dbProxy.BekleyenTransactionlariAl(0).ReturnsForAnyArgs(ornekTransactionLogKayitlari);//kaynakta transaction logda tek kayıt var
 			Kayit kaynaktakiKayit = new Kayit(null);
 			_dbProxy.KaynaktanTekKayitAl(null).ReturnsForAnyArgs(kaynaktakiKayit);//kaynakta kayıt olduğunu simule ediyorum
 
@@ -102,7 +103,7 @@ namespace AdaDataSync.Test
 		{
 			//given
 			List<DataTransactionInfo> ornekTransactionLogKayitlari = ornekTransactionLogKayitlariYarat(1);
-			_dbProxy.BekleyenTransactionlariAl(1000).Returns(ornekTransactionLogKayitlari);//kaynakta transaction logda tek kayıt var
+			_dbProxy.BekleyenTransactionlariAl(0).ReturnsForAnyArgs(ornekTransactionLogKayitlari);//kaynakta transaction logda tek kayıt var
 			Kayit kaynaktakiKayit = new Kayit(null);
 			_dbProxy.KaynaktanTekKayitAl(null).ReturnsForAnyArgs(kaynaktakiKayit);//kaynakta kayıt olduğunu simule ediyorum
 			_dbProxy.
@@ -116,37 +117,39 @@ namespace AdaDataSync.Test
 			_dbProxy.ReceivedWithAnyArgs(1).TransactionLogKaydinaHataMesajiYaz(ornekTransactionLogKayitlari[0], new Exception());
 		}
 
-		[Test]
-		public void kaynaktan_transaction_log_alinirken_hata_olursa_ikincil_loggera_gonder()//örneğin dosya sistemi
-		{
-			_dbProxy.When(proxy => proxy.BekleyenTransactionlariAl(1000)).Do(x => { throw new Exception("Transaction log alınamıyor"); });
+        // başkasının işi. başka classın testi
+        //[Test]
+        //public void kaynaktan_transaction_log_alinirken_hata_olursa_ikincil_loggera_gonder()//örneğin dosya sistemi
+        //{
+        //    _dbProxy.WhenForAnyArgs(proxy => proxy.BekleyenTransactionlariAl(0)).Do(x => { throw new Exception("Transaction log alınamıyor"); });
 
-			_service.Sync();
+        //    _service.Sync();
 
-			_ikincilLogger.ReceivedWithAnyArgs(1).HataLogla(null);
-		}
+        //    _ikincilLogger.ReceivedWithAnyArgs().HataLogla(null);
+        //}
 
-		[Test]
-		public void hedefte_islem_yaparken_hata_alinir_bu_hata_loglanirkende_hata_alinirsa_ikincil_loggera_gonder()//örneğin dosya sistemi
-		{
-			//given
-			List<DataTransactionInfo> ornekTransactionLogKayitlari = ornekTransactionLogKayitlariYarat(1);
-			_dbProxy.BekleyenTransactionlariAl(1000).Returns(ornekTransactionLogKayitlari);//kaynakta transaction logda tek kayıt var
-			Kayit kaynaktakiKayit = new Kayit(null);
-			_dbProxy.KaynaktanTekKayitAl(null).ReturnsForAnyArgs(kaynaktakiKayit);//kaynakta kayıt olduğunu simule ediyorum
-			_dbProxy.
-				When(proxy => proxy.HedefteInsertVeyaUpdate(kaynaktakiKayit, Arg.Any<DataTransactionInfo>())).
-				Do(x => { throw new Exception("Hedefte güncellerken hata oluştu"); });
-			_dbProxy.
-				WhenForAnyArgs(proxy => proxy.TransactionLogKaydinaHataMesajiYaz(null, null)).
-				Do(x => { throw new Exception("Transaction loga hata yazarken hata oluştu"); });
+        // başkasının işi. başka classın testi
+        //[Test]
+        //public void hedefte_islem_yaparken_hata_alinir_bu_hata_loglanirkende_hata_alinirsa_ikincil_loggera_gonder()//örneğin dosya sistemi
+        //{
+        //    //given
+        //    List<DataTransactionInfo> ornekTransactionLogKayitlari = ornekTransactionLogKayitlariYarat(1);
+        //    _dbProxy.BekleyenTransactionlariAl(0).ReturnsForAnyArgs(ornekTransactionLogKayitlari);//kaynakta transaction logda tek kayıt var
+        //    Kayit kaynaktakiKayit = new Kayit(null);
+        //    _dbProxy.KaynaktanTekKayitAl(null).ReturnsForAnyArgs(kaynaktakiKayit);//kaynakta kayıt olduğunu simule ediyorum
+        //    _dbProxy.
+        //        When(proxy => proxy.HedefteInsertVeyaUpdate(kaynaktakiKayit, Arg.Any<DataTransactionInfo>())).
+        //        Do(x => { throw new Exception("Hedefte güncellerken hata oluştu"); });
+        //    _dbProxy.
+        //        WhenForAnyArgs(proxy => proxy.TransactionLogKaydinaHataMesajiYaz(null, null)).
+        //        Do(x => { throw new Exception("Transaction loga hata yazarken hata oluştu"); });
 
-			//when
-			_service.Sync();
+        //    //when
+        //    _service.Sync();
 
-			//then
-			_ikincilLogger.ReceivedWithAnyArgs(1).HataLogla(null);
-		}
+        //    //then
+        //    _ikincilLogger.ReceivedWithAnyArgs(1).HataLogla(null);
+        //}
 
 		//[Test]
 		//public void 
@@ -155,15 +158,15 @@ namespace AdaDataSync.Test
 		{
 
 			List<DataTransactionInfo> kayitlar = new List<DataTransactionInfo>();
-			for (int i = 0; i < adet; i++)
-				kayitlar.Add(new DataTransactionInfo(null));
+		    for (int i = 0; i < adet; i++)
+		        kayitlar.Add(new DataTransactionInfo(5 + i, "pol", "fprkpol", 11234 + 2*i));
 			return kayitlar;
 		}
 
 		private DataTransactionInfo tekTransactionluTestOrtamiHazirla(Kayit kaynaktakiKayit)
 		{
-			DataTransactionInfo transactionInfo = new DataTransactionInfo(null);
-			_dbProxy.BekleyenTransactionlariAl(1000).Returns(new List<DataTransactionInfo> {transactionInfo});
+			DataTransactionInfo transactionInfo = new DataTransactionInfo(7, "pol", "fprkpol", 12345);
+			_dbProxy.BekleyenTransactionlariAl(0).ReturnsForAnyArgs(new List<DataTransactionInfo> {transactionInfo});
 			_dbProxy.KaynaktanTekKayitAl(transactionInfo).Returns(kaynaktakiKayit);
 			return transactionInfo;
 		}

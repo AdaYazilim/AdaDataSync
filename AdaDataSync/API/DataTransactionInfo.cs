@@ -21,12 +21,22 @@ namespace AdaDataSync.API
         public readonly string PrimaryKeyKolonAdi;
         public readonly int PrimaryKeyDegeri;
 
-        public DataTransactionInfo(DataRow dr)
+        public DataTransactionInfo(int prkLog, string tabloAdi, string primaryKeyKolonAdi, int primaryKeyDegeri)
         {
-            PrkLog = (int)dr["fprktrlog2"];
-            TabloAdi = dr["dosyaadi"].ToString().Trim().ToLowerInvariant();
-            PrimaryKeyKolonAdi = dr["prkalanadi"].ToString().Trim().ToLowerInvariant();
-            PrimaryKeyDegeri = (int)dr["prkdeger"];
+            PrkLog = prkLog;
+            TabloAdi = tabloAdi;
+            PrimaryKeyKolonAdi = primaryKeyKolonAdi;
+            PrimaryKeyDegeri = primaryKeyDegeri;
         }
+
+        //public DataTransactionInfo(DataRow dr)
+        //{
+        //    PrkLog = (int)dr["fprktrlog2"];
+        //    TabloAdi = dr["dosyaadi"].ToString().Trim().ToLowerInvariant();
+        //    PrimaryKeyKolonAdi = dr["prkalanadi"].ToString().Trim().ToLowerInvariant();
+        //    PrimaryKeyDegeri = (int)dr["prkdeger"];
+        //}
+
+
     }
 }
