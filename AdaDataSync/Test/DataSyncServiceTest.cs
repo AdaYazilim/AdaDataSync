@@ -20,7 +20,9 @@ namespace AdaDataSync.Test
 			_dbProxy = Substitute.For<IDatabaseProxy>();
 			_servisKontrolcusu = Substitute.For<ICalisanServisKontrolcusu>();
 			_ikincilLogger = Substitute.For<ISafetyNetLogger>();
-			_service = new DataSyncService(_dbProxy, _servisKontrolcusu, _ikincilLogger);
+            //_service = new DataSyncService(_dbProxy, _servisKontrolcusu, _ikincilLogger);
+            //_service = new DataSyncService(_dbProxy, _servisKontrolcusu);
+            _service = new DataSyncService(_dbProxy);
 		}
 
 		/*
@@ -47,7 +49,7 @@ namespace AdaDataSync.Test
 		[Test]
 		public void kaynakta_kayit_varsa_hedefe_kaydi_gonder()
 		{
-			Kayit kaynaktakiKayit = new Kayit();
+			Kayit kaynaktakiKayit = new Kayit(null);
 			tekTransactionluTestOrtamiHazirla(kaynaktakiKayit);
 
 			_service.Sync();
@@ -64,7 +66,7 @@ namespace AdaDataSync.Test
 
 			_service.Sync();
 
-			_dbProxy.DidNotReceiveWithAnyArgs().BekleyenTransactionlariAl();
+			_dbProxy.DidNotReceiveWithAnyArgs().BekleyenTransactionlariAl(1000);
 		}
 
 		[Test]
@@ -84,8 +86,8 @@ namespace AdaDataSync.Test
 		{
 			//given
 			List<DataTransactionInfo> ornekTransactionLogKayitlari = ornekTransactionLogKayitlariYarat(1);
-			_dbProxy.BekleyenTransactionlariAl().Returns(ornekTransactionLogKayitlari);//kaynakta transaction logda tek kayıt var
-			Kayit kaynaktakiKayit = new Kayit();
+			_dbProxy.BekleyenTransactionlariAl(1000).Returns(ornekTransactionLogKayitlari);//kaynakta transaction logda tek kayıt var
+			Kayit kaynaktakiKayit = new Kayit(null);
 			_dbProxy.KaynaktanTekKayitAl(null).ReturnsForAnyArgs(kaynaktakiKayit);//kaynakta kayıt olduğunu simule ediyorum
 
 			//when
@@ -100,8 +102,8 @@ namespace AdaDataSync.Test
 		{
 			//given
 			List<DataTransactionInfo> ornekTransactionLogKayitlari = ornekTransactionLogKayitlariYarat(1);
-			_dbProxy.BekleyenTransactionlariAl().Returns(ornekTransactionLogKayitlari);//kaynakta transaction logda tek kayıt var
-			Kayit kaynaktakiKayit = new Kayit();
+			_dbProxy.BekleyenTransactionlariAl(1000).Returns(ornekTransactionLogKayitlari);//kaynakta transaction logda tek kayıt var
+			Kayit kaynaktakiKayit = new Kayit(null);
 			_dbProxy.KaynaktanTekKayitAl(null).ReturnsForAnyArgs(kaynaktakiKayit);//kaynakta kayıt olduğunu simule ediyorum
 			_dbProxy.
 				When(proxy => proxy.HedefteInsertVeyaUpdate(kaynaktakiKayit, Arg.Any<DataTransactionInfo>())).
@@ -111,13 +113,13 @@ namespace AdaDataSync.Test
 			_service.Sync();
 
 			//then
-			_dbProxy.ReceivedWithAnyArgs(1).TransactionLogKaydinaHataMesajiYaz(ornekTransactionLogKayitlari[0], "");
+			_dbProxy.ReceivedWithAnyArgs(1).TransactionLogKaydinaHataMesajiYaz(ornekTransactionLogKayitlari[0], new Exception());
 		}
 
 		[Test]
 		public void kaynaktan_transaction_log_alinirken_hata_olursa_ikincil_loggera_gonder()//örneğin dosya sistemi
 		{
-			_dbProxy.When(proxy => proxy.BekleyenTransactionlariAl()).Do(x => { throw new Exception("Transaction log alınamıyor"); });
+			_dbProxy.When(proxy => proxy.BekleyenTransactionlariAl(1000)).Do(x => { throw new Exception("Transaction log alınamıyor"); });
 
 			_service.Sync();
 
@@ -129,8 +131,8 @@ namespace AdaDataSync.Test
 		{
 			//given
 			List<DataTransactionInfo> ornekTransactionLogKayitlari = ornekTransactionLogKayitlariYarat(1);
-			_dbProxy.BekleyenTransactionlariAl().Returns(ornekTransactionLogKayitlari);//kaynakta transaction logda tek kayıt var
-			Kayit kaynaktakiKayit = new Kayit();
+			_dbProxy.BekleyenTransactionlariAl(1000).Returns(ornekTransactionLogKayitlari);//kaynakta transaction logda tek kayıt var
+			Kayit kaynaktakiKayit = new Kayit(null);
 			_dbProxy.KaynaktanTekKayitAl(null).ReturnsForAnyArgs(kaynaktakiKayit);//kaynakta kayıt olduğunu simule ediyorum
 			_dbProxy.
 				When(proxy => proxy.HedefteInsertVeyaUpdate(kaynaktakiKayit, Arg.Any<DataTransactionInfo>())).
@@ -154,14 +156,14 @@ namespace AdaDataSync.Test
 
 			List<DataTransactionInfo> kayitlar = new List<DataTransactionInfo>();
 			for (int i = 0; i < adet; i++)
-				kayitlar.Add(new DataTransactionInfo());
+				kayitlar.Add(new DataTransactionInfo(null));
 			return kayitlar;
 		}
 
 		private DataTransactionInfo tekTransactionluTestOrtamiHazirla(Kayit kaynaktakiKayit)
 		{
-			DataTransactionInfo transactionInfo = new DataTransactionInfo();
-			_dbProxy.BekleyenTransactionlariAl().Returns(new List<DataTransactionInfo> {transactionInfo});
+			DataTransactionInfo transactionInfo = new DataTransactionInfo(null);
+			_dbProxy.BekleyenTransactionlariAl(1000).Returns(new List<DataTransactionInfo> {transactionInfo});
 			_dbProxy.KaynaktanTekKayitAl(transactionInfo).Returns(kaynaktakiKayit);
 			return transactionInfo;
 		}

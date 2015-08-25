@@ -1,41 +1,38 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
 using System.Linq;
 using AdaVeriKatmani;
-using NSubstitute;
-using NUnit.Framework;
 
 namespace AdaDataSync.API
 {
-	[TestFixture]
-	public class DatabaseProxyTest
-	{
-		private ITemelVeriIslemleri _kaynakVeriIslemleri;
-		private ITemelVeriIslemleri _hedefVeriIslemleri;
+    //[TestFixture]
+    //public class DatabaseProxyTest
+    //{
+    //    private ITemelVeriIslemleri _kaynakVeriIslemleri;
+    //    private ITemelVeriIslemleri _hedefVeriIslemleri;
 
-		[Test]
-		public void insert_veya_update_hedef_veri_islemlerinde_calistirilir()
-		{
-			_kaynakVeriIslemleri = Substitute.For<ITemelVeriIslemleri>();
-			_hedefVeriIslemleri = Substitute.For<ITemelVeriIslemleri>();
+    //    [Test]
+    //    public void insert_veya_update_hedef_veri_islemlerinde_calistirilir()
+    //    {
+    //        _kaynakVeriIslemleri = Substitute.For<ITemelVeriIslemleri>();
+    //        _hedefVeriIslemleri = Substitute.For<ITemelVeriIslemleri>();
 
-			DatabaseProxy dbProxy = new DatabaseProxy(_kaynakVeriIslemleri, _hedefVeriIslemleri);
+    //        DatabaseProxy dbProxy = new DatabaseProxy(_kaynakVeriIslemleri, _hedefVeriIslemleri);
 
-			Kayit kaynaktakiKayit = new Kayit();
-			DataTransactionInfo transactionInfo = new DataTransactionInfo();
+    //        Kayit kaynaktakiKayit = new Kayit(null);
+    //        DataTransactionInfo transactionInfo = new DataTransactionInfo(null);
 			
-			dbProxy.HedefteInsertVeyaUpdate(kaynaktakiKayit, transactionInfo);
+    //        dbProxy.HedefteInsertVeyaUpdate(kaynaktakiKayit, transactionInfo);
 
-			_hedefVeriIslemleri.ReceivedWithAnyArgs().TekKayitGuncelle(transactionInfo.TabloAdi, transactionInfo.PrimaryKeyKolonAdi, transactionInfo.PrimaryKeyDegeri, kaynaktakiKayit.DataRow);
+    //        _hedefVeriIslemleri.ReceivedWithAnyArgs().TekKayitGuncelle(transactionInfo.TabloAdi, transactionInfo.PrimaryKeyKolonAdi, transactionInfo.PrimaryKeyDegeri, kaynaktakiKayit.DataRow);
 
-			//_hedefVeriIslemleri.Received().SelectTekKolondan(transactionInfo.TabloAdi, transactionInfo.PrimaryKeyKolonAdi, transactionInfo.PrimaryKeyDegeri);
-			//_hedefVeriIslemleri.ReceivedWithAnyArgs().DataAdaptorUpdateCagir();
+    //        //_hedefVeriIslemleri.Received().SelectTekKolondan(transactionInfo.TabloAdi, transactionInfo.PrimaryKeyKolonAdi, transactionInfo.PrimaryKeyDegeri);
+    //        //_hedefVeriIslemleri.ReceivedWithAnyArgs().DataAdaptorUpdateCagir();
 
-		}
+    //    }
 
-	}
+    //}
 	
 	public class DatabaseProxy : IDatabaseProxy
 	{
@@ -48,15 +45,18 @@ namespace AdaDataSync.API
 			_hedefVeriIslemleri = hedefVeriIslemleri;
 		}
 
-		public List<DataTransactionInfo> BekleyenTransactionlariAl()
+		public List<DataTransactionInfo> BekleyenTransactionlariAl(int kayitSayisi)
 		{
-			DataTable dt = _kaynakVeriIslemleri.SelectTop("trlog", 10000);
-			return (from DataRow dr in dt.Rows select DataTransactionInfo.Yarat(dr)).ToList();
+            //DataTable dt = _kaynakVeriIslemleri.SelectTop("trlog", 10000);
+		    DataTable dt = _kaynakVeriIslemleri.TransactionIciDoldur("select top " + kayitSayisi + " * from trlog order by oncekitur desc, fprktrlog2");
+
+			return (from DataRow dr in dt.Rows select new DataTransactionInfo(dr)).ToList();
 		}
 
 		public Kayit KaynaktanTekKayitAl(DataTransactionInfo transactionInfo)
 		{
-			DataTable dt = _kaynakVeriIslemleri.Select(transactionInfo.TabloAdi, transactionInfo.PrimaryKeyKolonAdi, transactionInfo.PrimaryKeyDegeri);
+		    string komut = "select * from " + transactionInfo.TabloAdi + " where " + transactionInfo.PrimaryKeyKolonAdi + "=" + transactionInfo.PrimaryKeyDegeri;
+			DataTable dt = _kaynakVeriIslemleri.TransactionIciDoldur(komut);
 			if (dt.Rows.Count == 0)
 				return null;
 			return new Kayit(dt.Rows[0]);
@@ -64,7 +64,11 @@ namespace AdaDataSync.API
 
 		public void HedeftenKayitSil(DataTransactionInfo transactionInfo)
 		{
-			_hedefVeriIslemleri.Delete(transactionInfo.TabloAdi, transactionInfo.PrimaryKeyKolonAdi, transactionInfo.PrimaryKeyDegeri);
+            // delete fonksiyonu hatalı
+            //_hedefVeriIslemleri.Delete(transactionInfo.TabloAdi, transactionInfo.PrimaryKeyKolonAdi, transactionInfo.PrimaryKeyDegeri);
+
+		    string silmeKomutu = "delete from " + transactionInfo.TabloAdi + " where " + transactionInfo.PrimaryKeyKolonAdi + " = :1";
+		    _hedefVeriIslemleri.TransactionIciSorguDisi(silmeKomutu, transactionInfo.PrimaryKeyDegeri);
 		}
 
 		public void HedefteInsertVeyaUpdate(Kayit kaynaktakiKayit, DataTransactionInfo transactionInfo)
@@ -89,12 +93,21 @@ namespace AdaDataSync.API
 
 		public void TransactionLogKayitSil(DataTransactionInfo transactionLog)
 		{
-			throw new NotImplementedException();
+            //_kaynakVeriIslemleri.Delete("trlog", "fprktrlog2", transactionLog.PrkLog);
+
+		    string silmeKomutu = "delete from trlog where fprktrlog2 = " + transactionLog.PrkLog;
+		    _kaynakVeriIslemleri.TransactionIciSorguDisi(silmeKomutu);
 		}
 
-		public void TransactionLogKaydinaHataMesajiYaz(DataTransactionInfo transactionLog, string hataMesaji)
+		public void TransactionLogKaydinaHataMesajiYaz(DataTransactionInfo transactionLog, Exception ex)
 		{
-			throw new NotImplementedException();
+		    string hataMesaji= ex.Message;
+
+		    if (hataMesaji.Length > 100)
+		        hataMesaji = hataMesaji.Substring(0, 100);
+
+            string updateKomut = "update trlog set hataacikla = :1 where fprktrlog2 = " + transactionLog.PrkLog;
+		    _kaynakVeriIslemleri.TransactionIciSorguDisi(updateKomut, hataMesaji);
 		}
 	}
 }

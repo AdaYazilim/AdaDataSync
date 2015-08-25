@@ -1,49 +1,83 @@
 ﻿using System;
-using AdaDataSync.Test;
+using System.Collections.Generic;
 
 namespace AdaDataSync.API
 {
 	public class DataSyncService
 	{
 		private readonly IDatabaseProxy _dbProxy;
-		private readonly ICalisanServisKontrolcusu _servisKontrolcusu;
-		private readonly ISafetyNetLogger _ikincilLogger;
+        //private readonly ICalisanServisKontrolcusu _servisKontrolcusu;
+        //private readonly ISafetyNetLogger _ikincilLogger;
 
-		public DataSyncService(IDatabaseProxy dbProxy, ICalisanServisKontrolcusu servisKontrolcusu, ISafetyNetLogger ikincilLogger)
-		{
-			_dbProxy = dbProxy;
-			_servisKontrolcusu = servisKontrolcusu;
-			_ikincilLogger = ikincilLogger;
-		}
+        //public DataSyncService(IDatabaseProxy dbProxy, ICalisanServisKontrolcusu servisKontrolcusu, ISafetyNetLogger ikincilLogger)
+        //{
+        //    _dbProxy = dbProxy;
+        //    _servisKontrolcusu = servisKontrolcusu;
+        //    _ikincilLogger = ikincilLogger;
+        //}
 
-		public void Sync()
-		{
-			if (_servisKontrolcusu.BuMakinadaBaskaServisCalisiyorMu())
-				return;
+        public DataSyncService(IDatabaseProxy dbProxy)
+        {
+            _dbProxy = dbProxy;
+        }
 
-			_servisKontrolcusu.MakinaBazindaKilitKoy();
+	    public void Sync()
+	    {
+            //if (_servisKontrolcusu.BuMakinadaBaskaServisCalisiyorMu())
+            //    return;
 
-			try
-			{
-				_dbProxy.BekleyenTransactionlariAl().ForEach(logKaydi =>
-				{
-					try
-					{
-						tekLogKaydiniIsle(logKaydi);
-					}
-					catch (Exception ex)
-					{
-						_dbProxy.TransactionLogKaydinaHataMesajiYaz(logKaydi, ex.Message);
-					}
-				});
-			}
-			catch (Exception ex)
-			{
-				_ikincilLogger.HataLogla(ex);
-			}
-		}
+            //_servisKontrolcusu.MakinaBazindaKilitKoy();
 
-		private void tekLogKaydiniIsle(DataTransactionInfo logKaydi)
+	        //try
+	        //{
+	        //    _dbProxy.BekleyenTransactionlariAl().ForEach(logKaydi =>
+	        //    {
+	        //        try
+	        //        {
+	        //            tekLogKaydiniIsle(logKaydi);
+	        //        }
+	        //        catch (Exception ex)
+	        //        {
+	        //            _dbProxy.TransactionLogKaydinaHataMesajiYaz(logKaydi, ex.Message);
+	        //        }
+	        //    });
+	        //}
+	        //catch (Exception ex)
+	        //{
+	        //    _ikincilLogger.HataLogla(ex);
+	        //}
+
+            const int herSeferindeAlinacakKayitMaksSayisi = 10000;
+
+            //_dbProxy.BekleyenTransactionlariAl(herSeferindeAlinacakKayitMaksSayisi).ForEach(logKaydi =>
+            //{
+            //    try
+            //    {
+            //        tekLogKaydiniIsle(logKaydi);
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        _dbProxy.TransactionLogKaydinaHataMesajiYaz(logKaydi, ex);
+            //    }
+            //});
+
+	        List<DataTransactionInfo> trInfolar = _dbProxy.BekleyenTransactionlariAl(herSeferindeAlinacakKayitMaksSayisi);
+            Console.WriteLine(string.Format("Aktarılmaya çalışılacak kayıt adedi : {0}", trInfolar.Count));
+
+	        foreach (DataTransactionInfo logKaydi in trInfolar)
+	        {
+                try
+                {
+                    tekLogKaydiniIsle(logKaydi);
+                }
+                catch (Exception ex)
+                {
+                    _dbProxy.TransactionLogKaydinaHataMesajiYaz(logKaydi, ex);
+                }
+	        }
+	    }
+
+	    private void tekLogKaydiniIsle(DataTransactionInfo logKaydi)
 		{
 			Kayit kaynaktakiKayit = _dbProxy.KaynaktanTekKayitAl(logKaydi);
 

@@ -52,6 +52,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="API\DataSyncService.cs" />
+    <Compile Include="API\ISafetyNetLogger.cs" />
+    <Compile Include="API\SafetyNetLogger.cs" />
+    <Compile Include="CalisanServisKontrolcusu.cs" />
+    <Compile Include="Test\DatabaseProxyTest.cs" />
     <Compile Include="Test\DataSyncServiceTest.cs" />
     <Compile Include="API\DataTransactionInfo.cs" />
     <Compile Include="API\ICalisanServisKontrolcusu.cs" />
@@ -60,7 +64,6 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="API\DatabaseProxy.cs" />
-    <Compile Include="Test\ISafetyNetLogger.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
