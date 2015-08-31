@@ -8,14 +8,14 @@ namespace AdaDataSync.Test
     [TestFixture]
     public class DatabaseProxyTest
     {
-        private ITemelVeriIslemleri _kaynakVeriIslemleri;
-        private ITemelVeriIslemleri _hedefVeriIslemleri;
+        private ITekConnectionVeriIslemleri _kaynakVeriIslemleri;
+        private ITekConnectionVeriIslemleri _hedefVeriIslemleri;
 
         [Test]
         public void insert_veya_update_hedef_veri_islemlerinde_calistirilir()
         {
-            _kaynakVeriIslemleri = Substitute.For<ITemelVeriIslemleri>();
-            _hedefVeriIslemleri = Substitute.For<ITemelVeriIslemleri>();
+            _kaynakVeriIslemleri = Substitute.For<ITekConnectionVeriIslemleri>();
+            _hedefVeriIslemleri = Substitute.For<ITekConnectionVeriIslemleri>();
 
             DatabaseProxy dbProxy = new DatabaseProxy(_kaynakVeriIslemleri, _hedefVeriIslemleri);
 
@@ -24,7 +24,7 @@ namespace AdaDataSync.Test
 
             dbProxy.HedefteInsertVeyaUpdate(kaynaktakiKayit, transactionInfo);
 
-            _hedefVeriIslemleri.ReceivedWithAnyArgs().TekKayitGuncelle(transactionInfo.TabloAdi, transactionInfo.PrimaryKeyKolonAdi, transactionInfo.PrimaryKeyDegeri, kaynaktakiKayit.DataRow);
+            _hedefVeriIslemleri.ReceivedWithAnyArgs().TekKayitGuncelle(transactionInfo.TabloAdi, transactionInfo.PrimaryKeyKolonAdi, transactionInfo.PrimaryKeyDegeri, kaynaktakiKayit.DataRow.ItemArray);
 
             //_hedefVeriIslemleri.Received().SelectTekKolondan(transactionInfo.TabloAdi, transactionInfo.PrimaryKeyKolonAdi, transactionInfo.PrimaryKeyDegeri);
             //_hedefVeriIslemleri.ReceivedWithAnyArgs().DataAdaptorUpdateCagir();

@@ -85,8 +85,8 @@ namespace AdaDataSync
 
         private static void syncYap(string kaynakBaglanti, string hedefBaglanti)
         {
-            TemelVeriIslemleri tviKaynak = new TemelVeriIslemleri(VeritabaniTipi.FoxPro, kaynakBaglanti);
-            TemelVeriIslemleri tviHedef = new TemelVeriIslemleri(VeritabaniTipi.SqlServer, hedefBaglanti);
+            ITekConnectionVeriIslemleri tviKaynak = new TemelVeriIslemleri(VeritabaniTipi.FoxPro, kaynakBaglanti);
+            ITekConnectionVeriIslemleri tviHedef = new TemelVeriIslemleri(VeritabaniTipi.SqlServer, hedefBaglanti);
 
             DatabaseProxy dp = new DatabaseProxy(tviKaynak, tviHedef);
             DataSyncService sync = new DataSyncService(dp);

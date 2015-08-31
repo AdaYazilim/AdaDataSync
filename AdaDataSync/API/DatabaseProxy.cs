@@ -36,19 +36,19 @@ namespace AdaDataSync.API
 	
 	public class DatabaseProxy : IDatabaseProxy
 	{
-		private readonly ITemelVeriIslemleri _kaynakVeriIslemleri;
-		private readonly ITemelVeriIslemleri _hedefVeriIslemleri;
+        private readonly ITekConnectionVeriIslemleri _kaynakVeriIslemleri;
+        private readonly ITekConnectionVeriIslemleri _hedefVeriIslemleri;
 
-		public DatabaseProxy(ITemelVeriIslemleri kaynakVeriIslemleri, ITemelVeriIslemleri hedefVeriIslemleri)
+        public DatabaseProxy(ITekConnectionVeriIslemleri kaynakVeriIslemleri, ITekConnectionVeriIslemleri hedefVeriIslemleri)
 		{
-			_kaynakVeriIslemleri = kaynakVeriIslemleri;
+            _kaynakVeriIslemleri = kaynakVeriIslemleri;
 			_hedefVeriIslemleri = hedefVeriIslemleri;
 		}
 
 		public List<DataTransactionInfo> BekleyenTransactionlariAl(int kayitSayisi)
 		{
             //DataTable dt = _kaynakVeriIslemleri.SelectTop("trlog", 10000);
-		    DataTable dt = _kaynakVeriIslemleri.TransactionIciDoldur("select top " + kayitSayisi + " * from trlog order by oncekitur desc, fprktrlog2");
+		    DataTable dt = _kaynakVeriIslemleri.Doldur("select top " + kayitSayisi + " * from trlog order by oncekitur desc, fprktrlog2");
 
 			return (from DataRow dr in dt.Rows 
                     select new DataTransactionInfo
@@ -64,10 +64,10 @@ namespace AdaDataSync.API
 		public Kayit KaynaktanTekKayitAl(DataTransactionInfo transactionInfo)
 		{
 		    string komut = "select * from " + transactionInfo.TabloAdi + " where " + transactionInfo.PrimaryKeyKolonAdi + "=" + transactionInfo.PrimaryKeyDegeri;
-			DataTable dt = _kaynakVeriIslemleri.TransactionIciDoldur(komut);
+			DataTable dt = _kaynakVeriIslemleri.Doldur(komut);
 			if (dt.Rows.Count == 0)
 				return null;
-			return new Kayit(dt.Rows[0]);
+            return new Kayit(dt.Rows[0]);
 		}
 
 		public void HedeftenKayitSil(DataTransactionInfo transactionInfo)
@@ -76,12 +76,12 @@ namespace AdaDataSync.API
             //_hedefVeriIslemleri.Delete(transactionInfo.TabloAdi, transactionInfo.PrimaryKeyKolonAdi, transactionInfo.PrimaryKeyDegeri);
 
 		    string silmeKomutu = "delete from " + transactionInfo.TabloAdi + " where " + transactionInfo.PrimaryKeyKolonAdi + " = :1";
-		    _hedefVeriIslemleri.TransactionIciSorguDisi(silmeKomutu, transactionInfo.PrimaryKeyDegeri);
+		    _hedefVeriIslemleri.SorguDisi(silmeKomutu, transactionInfo.PrimaryKeyDegeri);
 		}
 
 		public void HedefteInsertVeyaUpdate(Kayit kaynaktakiKayit, DataTransactionInfo transactionInfo)
 		{
-			_hedefVeriIslemleri.TekKayitGuncelle(transactionInfo.TabloAdi, transactionInfo.PrimaryKeyKolonAdi, transactionInfo.PrimaryKeyDegeri, kaynaktakiKayit.DataRow);
+			_hedefVeriIslemleri.TekKayitGuncelle(transactionInfo.TabloAdi, transactionInfo.PrimaryKeyKolonAdi, transactionInfo.PrimaryKeyDegeri, kaynaktakiKayit.DataRow.ItemArray);
 			//new SqlDataAdapter()
 			//DataRow drKayit = kaynaktakiKayit.DataRow;
 			//SqlDataAdapter adaptor = (SqlDataAdapter) _hedefVeriIslemleri.DataAdapterAl("select * from " + transactionInfo.TabloAdi + " where " + transactionInfo.PrimaryKeyKolonAdi + " = " + transactionInfo.PrimaryKeyDegeri);
@@ -104,7 +104,7 @@ namespace AdaDataSync.API
             //_kaynakVeriIslemleri.Delete("trlog", "fprktrlog2", transactionLog.PrkLog);
 
 		    string silmeKomutu = "delete from trlog where fprktrlog2 = " + transactionLog.PrkLog;
-		    _kaynakVeriIslemleri.TransactionIciSorguDisi(silmeKomutu);
+		    _kaynakVeriIslemleri.SorguDisi(silmeKomutu);
 		}
 
 		public void TransactionLogKaydinaHataMesajiYaz(DataTransactionInfo transactionLog, Exception ex)
@@ -115,7 +115,7 @@ namespace AdaDataSync.API
 		        hataMesaji = hataMesaji.Substring(0, 100);
 
             string updateKomut = "update trlog set hataacikla = :1 where fprktrlog2 = " + transactionLog.PrkLog;
-		    _kaynakVeriIslemleri.TransactionIciSorguDisi(updateKomut, hataMesaji);
+		    _kaynakVeriIslemleri.SorguDisi(updateKomut, hataMesaji);
 		}
 	}
 }
