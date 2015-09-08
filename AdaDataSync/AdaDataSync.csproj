@@ -55,7 +55,7 @@
     <Compile Include="API\IDataSyncService.cs" />
     <Compile Include="API\ISafetyNetLogger.cs" />
     <Compile Include="API\SafetyNetLogger.cs" />
-    <Compile Include="CalisanServisKontrolcusu.cs" />
+    <Compile Include="API\CalisanServisKontrolcusu.cs" />
     <Compile Include="Test\DatabaseProxyTest.cs" />
     <Compile Include="Test\DataSyncServiceTest.cs" />
     <Compile Include="API\DataTransactionInfo.cs" />

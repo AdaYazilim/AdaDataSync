@@ -6,10 +6,6 @@ namespace AdaDataSync.API
 	{
 		public DataRow DataRow { get; private set; }
 
-        //public Kayit()
-        //{
-        //}
-
 		public Kayit(DataRow dataRow)
 		{
 			DataRow = dataRow;

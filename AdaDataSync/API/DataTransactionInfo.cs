@@ -1,19 +1,5 @@
-﻿using System.Data;
-
-namespace AdaDataSync.API
+﻿namespace AdaDataSync.API
 {
-    //public class DataTransactionInfo
-    //{
-    //    public static DataTransactionInfo Yarat(DataRow dr)
-    //    {
-    //        return new DataTransactionInfo();
-    //    }
-
-    //    public string TabloAdi { get; set; }
-    //    public string PrimaryKeyKolonAdi { get; set; }
-    //    public object PrimaryKeyDegeri { get; set; }
-    //}
-
     public class DataTransactionInfo
     {
         public readonly int PrkLog;
@@ -28,15 +14,5 @@ namespace AdaDataSync.API
             PrimaryKeyKolonAdi = primaryKeyKolonAdi;
             PrimaryKeyDegeri = primaryKeyDegeri;
         }
-
-        //public DataTransactionInfo(DataRow dr)
-        //{
-        //    PrkLog = (int)dr["fprktrlog2"];
-        //    TabloAdi = dr["dosyaadi"].ToString().Trim().ToLowerInvariant();
-        //    PrimaryKeyKolonAdi = dr["prkalanadi"].ToString().Trim().ToLowerInvariant();
-        //    PrimaryKeyDegeri = (int)dr["prkdeger"];
-        //}
-
-
     }
 }

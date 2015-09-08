@@ -6,34 +6,6 @@ using AdaVeriKatmani;
 
 namespace AdaDataSync.API
 {
-    //[TestFixture]
-    //public class DatabaseProxyTest
-    //{
-    //    private ITemelVeriIslemleri _kaynakVeriIslemleri;
-    //    private ITemelVeriIslemleri _hedefVeriIslemleri;
-
-    //    [Test]
-    //    public void insert_veya_update_hedef_veri_islemlerinde_calistirilir()
-    //    {
-    //        _kaynakVeriIslemleri = Substitute.For<ITemelVeriIslemleri>();
-    //        _hedefVeriIslemleri = Substitute.For<ITemelVeriIslemleri>();
-
-    //        DatabaseProxy dbProxy = new DatabaseProxy(_kaynakVeriIslemleri, _hedefVeriIslemleri);
-
-    //        Kayit kaynaktakiKayit = new Kayit(null);
-    //        DataTransactionInfo transactionInfo = new DataTransactionInfo(null);
-			
-    //        dbProxy.HedefteInsertVeyaUpdate(kaynaktakiKayit, transactionInfo);
-
-    //        _hedefVeriIslemleri.ReceivedWithAnyArgs().TekKayitGuncelle(transactionInfo.TabloAdi, transactionInfo.PrimaryKeyKolonAdi, transactionInfo.PrimaryKeyDegeri, kaynaktakiKayit.DataRow);
-
-    //        //_hedefVeriIslemleri.Received().SelectTekKolondan(transactionInfo.TabloAdi, transactionInfo.PrimaryKeyKolonAdi, transactionInfo.PrimaryKeyDegeri);
-    //        //_hedefVeriIslemleri.ReceivedWithAnyArgs().DataAdaptorUpdateCagir();
-
-    //    }
-
-    //}
-	
 	public class DatabaseProxy : IDatabaseProxy
 	{
         private readonly ITekConnectionVeriIslemleri _kaynakVeriIslemleri;
@@ -47,7 +19,6 @@ namespace AdaDataSync.API
 
 		public List<DataTransactionInfo> BekleyenTransactionlariAl(int kayitSayisi)
 		{
-            //DataTable dt = _kaynakVeriIslemleri.SelectTop("trlog", 10000);
 		    DataTable dt = _kaynakVeriIslemleri.Doldur("select top " + kayitSayisi + " * from trlog order by oncekitur desc, fprktrlog2");
 
 			return (from DataRow dr in dt.Rows 
@@ -72,9 +43,6 @@ namespace AdaDataSync.API
 
 		public void HedeftenKayitSil(DataTransactionInfo transactionInfo)
 		{
-            // delete fonksiyonu hatalı
-            //_hedefVeriIslemleri.Delete(transactionInfo.TabloAdi, transactionInfo.PrimaryKeyKolonAdi, transactionInfo.PrimaryKeyDegeri);
-
 		    string silmeKomutu = "delete from " + transactionInfo.TabloAdi + " where " + transactionInfo.PrimaryKeyKolonAdi + " = :1";
 		    _hedefVeriIslemleri.SorguDisi(silmeKomutu, transactionInfo.PrimaryKeyDegeri);
 		}
@@ -101,8 +69,6 @@ namespace AdaDataSync.API
 
 		public void TransactionLogKayitSil(DataTransactionInfo transactionLog)
 		{
-            //_kaynakVeriIslemleri.Delete("trlog", "fprktrlog2", transactionLog.PrkLog);
-
 		    string silmeKomutu = "delete from trlog where fprktrlog2 = " + transactionLog.PrkLog;
 		    _kaynakVeriIslemleri.SorguDisi(silmeKomutu);
 		}

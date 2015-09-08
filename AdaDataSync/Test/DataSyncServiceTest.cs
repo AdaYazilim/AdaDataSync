@@ -77,9 +77,35 @@ namespace AdaDataSync.Test
 			_dbProxy.ReceivedWithAnyArgs(1).TransactionLogKaydinaHataMesajiYaz(ornekTransactionLogKayitlari[0], new Exception());
 		}
 
+        [Test]
+        public void kaynaktan_transaction_log_alinirken_hata_olursa_sync_metodu_ayni_hatayi_throw_etmeli()
+        {
+            Exception ex = new Exception("Transaction log alınamıyor");
+            _dbProxy.WhenForAnyArgs(proxy => proxy.BekleyenTransactionlariAl(0)).Do(x => { throw ex; });
+
+            Assert.Throws<Exception>(() => _service.Sync());
+        }
+
+        [Test]
+        public void hedefte_islem_yaparken_hata_alinir_bu_hata_loglanirkende_hata_alinirsa_sync_metodu_ayni_hatayi_throw_etmeli()
+        {
+            //given
+            List<DataTransactionInfo> ornekTransactionLogKayitlari = ornekTransactionLogKayitlariYarat(1);
+            _dbProxy.BekleyenTransactionlariAl(0).ReturnsForAnyArgs(ornekTransactionLogKayitlari);//kaynakta transaction logda tek kayıt var
+            Kayit kaynaktakiKayit = new Kayit(null);
+            _dbProxy.KaynaktanTekKayitAl(null).ReturnsForAnyArgs(kaynaktakiKayit);//kaynakta kayıt olduğunu simule ediyorum
+            _dbProxy.
+                When(proxy => proxy.HedefteInsertVeyaUpdate(kaynaktakiKayit, Arg.Any<DataTransactionInfo>())).
+                Do(x => { throw new Exception("Hedefte güncellerken hata oluştu"); });
+            _dbProxy.
+                WhenForAnyArgs(proxy => proxy.TransactionLogKaydinaHataMesajiYaz(null, null)).
+                Do(x => { throw new Exception("Transaction loga hata yazarken hata oluştu"); });
+
+            Assert.Throws<Exception>(() => _service.Sync());
+        }
+
 		private static List<DataTransactionInfo> ornekTransactionLogKayitlariYarat(int adet)
 		{
-
 			List<DataTransactionInfo> kayitlar = new List<DataTransactionInfo>();
 		    for (int i = 0; i < adet; i++)
 		        kayitlar.Add(new DataTransactionInfo(5 + i, "pol", "fprkpol", 11234 + 2*i));

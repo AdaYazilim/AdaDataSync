@@ -1,6 +1,4 @@
-﻿using AdaDataSync.API;
-
-namespace AdaDataSync
+﻿namespace AdaDataSync.API
 {
     public class CalisanServisKontrolcusu : ICalisanServisKontrolcusu
     {
