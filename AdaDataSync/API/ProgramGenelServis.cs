@@ -6,9 +6,9 @@ namespace AdaDataSync.API
     {
         private readonly ICalisanServisKontrolcusu _calisanServisKontrolcusu;
         private readonly ISafetyNetLogger _safetyLogger;
-        private readonly IDataSyncService _syncService;
+        private readonly IDataSyncService[] _syncService;
 
-        public ProgramGenelServis(ICalisanServisKontrolcusu calisanServisKontrolcusu, ISafetyNetLogger safetyLogger, IDataSyncService syncService)
+        public ProgramGenelServis(ICalisanServisKontrolcusu calisanServisKontrolcusu, ISafetyNetLogger safetyLogger, params IDataSyncService[] syncService)
         {
             _calisanServisKontrolcusu = calisanServisKontrolcusu;
             _safetyLogger = safetyLogger;
@@ -22,13 +22,16 @@ namespace AdaDataSync.API
 
             _calisanServisKontrolcusu.MakinaBazindaKilitKoy();
 
-            try
+            foreach (IDataSyncService dataSyncService in _syncService)
             {
-                _syncService.Sync();
-            }
-            catch (Exception ex)
-            {
-                _safetyLogger.HataLogla(ex);
+                try
+                {
+                    dataSyncService.Sync();
+                }
+                catch (Exception ex)
+                {
+                    _safetyLogger.HataLogla(ex);
+                }    
             }
         }
     }
