@@ -24,7 +24,7 @@ namespace AdaDataSync.Test
 
             dbProxy.HedefteInsertVeyaUpdate(kaynaktakiKayit, transactionInfo);
 
-            _hedefVeriIslemleri.ReceivedWithAnyArgs().TekKayitGuncelle(transactionInfo.TabloAdi, transactionInfo.PrimaryKeyKolonAdi, transactionInfo.PrimaryKeyDegeri, kaynaktakiKayit.DataRow.ItemArray);
+            _hedefVeriIslemleri.ReceivedWithAnyArgs().TekKayitGuncelle(transactionInfo.TabloAdi, transactionInfo.PrimaryKeyKolonAdi, transactionInfo.PrimaryKeyDegeri, kaynaktakiKayit.DataRowItemArray);
 
             //_hedefVeriIslemleri.Received().SelectTekKolondan(transactionInfo.TabloAdi, transactionInfo.PrimaryKeyKolonAdi, transactionInfo.PrimaryKeyDegeri);
             //_hedefVeriIslemleri.ReceivedWithAnyArgs().DataAdaptorUpdateCagir();

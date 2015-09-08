@@ -38,7 +38,7 @@ namespace AdaDataSync.API
 			DataTable dt = _kaynakVeriIslemleri.Doldur(komut);
 			if (dt.Rows.Count == 0)
 				return null;
-            return new Kayit(dt.Rows[0]);
+            return new Kayit(dt.Rows[0].ItemArray);
 		}
 
 		public void HedeftenKayitSil(DataTransactionInfo transactionInfo)
@@ -49,7 +49,7 @@ namespace AdaDataSync.API
 
 		public void HedefteInsertVeyaUpdate(Kayit kaynaktakiKayit, DataTransactionInfo transactionInfo)
 		{
-			_hedefVeriIslemleri.TekKayitGuncelle(transactionInfo.TabloAdi, transactionInfo.PrimaryKeyKolonAdi, transactionInfo.PrimaryKeyDegeri, kaynaktakiKayit.DataRow.ItemArray);
+			_hedefVeriIslemleri.TekKayitGuncelle(transactionInfo.TabloAdi, transactionInfo.PrimaryKeyKolonAdi, transactionInfo.PrimaryKeyDegeri, kaynaktakiKayit.DataRowItemArray);
 			//new SqlDataAdapter()
 			//DataRow drKayit = kaynaktakiKayit.DataRow;
 			//SqlDataAdapter adaptor = (SqlDataAdapter) _hedefVeriIslemleri.DataAdapterAl("select * from " + transactionInfo.TabloAdi + " where " + transactionInfo.PrimaryKeyKolonAdi + " = " + transactionInfo.PrimaryKeyDegeri);

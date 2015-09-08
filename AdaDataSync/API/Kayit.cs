@@ -4,11 +4,11 @@ namespace AdaDataSync.API
 {
 	public class Kayit
 	{
-		public DataRow DataRow { get; private set; }
+		public object[] DataRowItemArray { get; private set; }
 
-		public Kayit(DataRow dataRow)
+		public Kayit(object[] dataRowItemArray)
 		{
-			DataRow = dataRow;
+			DataRowItemArray = dataRowItemArray;
 		}
 	}
 }
