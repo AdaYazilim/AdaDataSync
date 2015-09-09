@@ -6,7 +6,11 @@ using NUnit.Framework;
 
 namespace AdaDataSync.Test
 {
-	[TestFixture]
+    /*
+     * trlog çok kayıt içeriyorsa her seferinde ilk belirli bir sayıda kayıt alınmalı
+     * sql tablosunun primary keye sahip olduğu assert edilebilir.
+     */
+    [TestFixture]
 	class DataSyncServiceTest
 	{
 		private IDatabaseProxy _dbProxy;
