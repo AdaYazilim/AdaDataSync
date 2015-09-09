@@ -20,7 +20,7 @@ namespace AdaDataSync.Test
             DatabaseProxy dbProxy = new DatabaseProxy(_kaynakVeriIslemleri, _hedefVeriIslemleri);
 
             Kayit kaynaktakiKayit = new Kayit(null);
-            DataTransactionInfo transactionInfo = new DataTransactionInfo(7, "pol", "fprkpol", 12345);
+            DataTransactionInfo transactionInfo = new DataTransactionInfo(7, "pol", "fprkpol", 12345, "i", false);
 
             dbProxy.HedefteInsertVeyaUpdate(kaynaktakiKayit, transactionInfo);
 

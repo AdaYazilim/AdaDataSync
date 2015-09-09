@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using AdaVeriKatmani;
 
@@ -17,7 +19,17 @@ namespace AdaDataSync.API
 			_hedefVeriIslemleri = hedefVeriIslemleri;
 		}
 
-		public List<DataTransactionInfo> BekleyenTransactionlariAl(int kayitSayisi)
+	    public bool FoxproTarafindaGuncellemeYapiliyor()
+	    {
+            string pathName = Path.GetDirectoryName(_kaynakVeriIslemleri.DataSource);
+	        if (string.IsNullOrWhiteSpace(pathName))
+	            throw new Exception("_kaynakVeriIslemleri.DataSource boş olmamalı.");
+
+            string guncellemeTxtAdresi = Path.Combine(pathName, "GUNCELLEME.TXT");
+	        return File.Exists(guncellemeTxtAdresi);
+	    }
+
+	    public List<DataTransactionInfo> BekleyenTransactionlariAl(int kayitSayisi)
 		{
 		    DataTable dt = _kaynakVeriIslemleri.Doldur("select top " + kayitSayisi + " * from trlog order by oncekitur desc, fprktrlog2");
 
@@ -27,7 +39,9 @@ namespace AdaDataSync.API
                         (int)dr["fprktrlog2"],
                         dr["dosyaadi"].ToString().Trim().ToLowerInvariant(),
                         dr["prkalanadi"].ToString().Trim().ToLowerInvariant(),
-                        (int)dr["prkdeger"]
+                        (int)dr["prkdeger"],
+                        dr["islemtipi"].ToString().Trim(),
+                        (bool)dr["oncekitur"]
                         )
                    ).ToList();
 		}
@@ -83,5 +97,11 @@ namespace AdaDataSync.API
             string updateKomut = "update trlog set hataacikla = :1 where fprktrlog2 = " + transactionLog.PrkLog;
 		    _kaynakVeriIslemleri.SorguDisi(updateKomut, hataMesaji);
 		}
+
+	    public void TrLogKaydiniSqleAktar(DataTransactionInfo transactionInfo)
+	    {
+	        const string insertKomutu = "insert into trlog (dosyaadi,prkalanadi,prkdeger,islemtipi,fprktrlog2,oncekitur,tarihsaat) values(:1,:2,:3,:4,:5,:6,:7)";
+	        _hedefVeriIslemleri.SorguDisi(insertKomutu, transactionInfo.TabloAdi, transactionInfo.PrimaryKeyKolonAdi, transactionInfo.PrimaryKeyDegeri, transactionInfo.IslemTipi, transactionInfo.PrkLog, transactionInfo.OncekiTur, DateTime.Now);
+	    }
 	}
 }

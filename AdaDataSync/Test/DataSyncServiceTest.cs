@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using AdaDataSync.API;
 using NSubstitute;
 using NUnit.Framework;
@@ -20,8 +21,6 @@ namespace AdaDataSync.Test
 		public void TestSetup()
 		{
 			_dbProxy = Substitute.For<IDatabaseProxy>();
-			Substitute.For<ICalisanServisKontrolcusu>();
-			Substitute.For<ISafetyNetLogger>();
             _service = new DataSyncService(_dbProxy);
 		}
 
@@ -46,21 +45,63 @@ namespace AdaDataSync.Test
             _dbProxy.Received().HedefteInsertVeyaUpdate(kaynaktakiKayit, Arg.Any<DataTransactionInfo>());
         }
 
-		[Test]
-		public void hedefte_islem_basariyla_yapildiktan_sonra_transaction_logdan_kaydi_siler()//insert veya update
-		{
-			//given
-			List<DataTransactionInfo> ornekTransactionLogKayitlari = ornekTransactionLogKayitlariYarat(1);
-			_dbProxy.BekleyenTransactionlariAl(0).ReturnsForAnyArgs(ornekTransactionLogKayitlari);//kaynakta transaction logda tek kayıt var
-			Kayit kaynaktakiKayit = new Kayit(null);
-			_dbProxy.KaynaktanTekKayitAl(null).ReturnsForAnyArgs(kaynaktakiKayit);//kaynakta kayıt olduğunu simule ediyorum
+        [Test]
+        public void hedefte_islem_basariyla_yapildiktan_sonra_bu_kaydi_sqldeki_trloga_aktarir_ve_foxprodaki_trlogdan_silinir()
+        {
+            //given
+            List<DataTransactionInfo> ornekTransactionLogKayitlari = ornekTransactionLogKayitlariYarat(1);
+            _dbProxy.BekleyenTransactionlariAl(0).ReturnsForAnyArgs(ornekTransactionLogKayitlari);//kaynakta transaction logda tek kayıt var
+            Kayit kaynaktakiKayit = new Kayit(null);
+            _dbProxy.KaynaktanTekKayitAl(null).ReturnsForAnyArgs(kaynaktakiKayit);//kaynakta kayıt olduğunu simule ediyorum
 
-			//when
-			_service.Sync();
+            //when
+            _service.Sync();
 
-			//then
-			_dbProxy.Received(1).TransactionLogKayitSil(ornekTransactionLogKayitlari[0]);
-		}
+            //then
+            DataTransactionInfo tekTrInfo = ornekTransactionLogKayitlari.Single();
+            _dbProxy.Received(1).TrLogKaydiniSqleAktar(tekTrInfo);
+            _dbProxy.Received(1).TransactionLogKayitSil(tekTrInfo);
+        }
+
+        [Test]
+        public void hedefte_islem_basariyla_yapilmazsa_bu_kayit_sqle_aktarilmaz_ve_trlogdan_silinmez()
+        {
+            //given
+            List<DataTransactionInfo> ornekTransactionLogKayitlari = ornekTransactionLogKayitlariYarat(1);
+            _dbProxy.BekleyenTransactionlariAl(0).ReturnsForAnyArgs(ornekTransactionLogKayitlari); //kaynakta transaction logda tek kayıt var
+            Kayit kaynaktakiKayit = new Kayit(null);
+            _dbProxy.KaynaktanTekKayitAl(null).ReturnsForAnyArgs(kaynaktakiKayit); //kaynakta kayıt olduğunu simule ediyorum
+            DataTransactionInfo tekTrInfo = ornekTransactionLogKayitlari.Single();
+            _dbProxy
+                .When(dbp => dbp.HedefteInsertVeyaUpdate(kaynaktakiKayit, tekTrInfo))
+                .Do(x =>{throw new Exception();});
+            //when
+            _service.Sync();
+
+            //then
+            _dbProxy.DidNotReceive().TrLogKaydiniSqleAktar(tekTrInfo);
+            _dbProxy.DidNotReceive().TransactionLogKayitSil(tekTrInfo);
+        }
+        
+        [Test]
+        public void trlog_sqle_aktarilirken_hata_atarsa_transaction_logdan_kayit_silinmez()
+        {
+            //given
+            List<DataTransactionInfo> ornekTransactionLogKayitlari = ornekTransactionLogKayitlariYarat(1);
+            _dbProxy.BekleyenTransactionlariAl(0).ReturnsForAnyArgs(ornekTransactionLogKayitlari);//kaynakta transaction logda tek kayıt var
+            Kayit kaynaktakiKayit = new Kayit(null);
+            _dbProxy.KaynaktanTekKayitAl(null).ReturnsForAnyArgs(kaynaktakiKayit);//kaynakta kayıt olduğunu simule ediyorum
+            DataTransactionInfo tekTrInfo = ornekTransactionLogKayitlari.Single();
+            _dbProxy
+                .When(dbp => dbp.TrLogKaydiniSqleAktar(tekTrInfo))
+                .Do(x => { throw new Exception(); });
+
+            //when
+            _service.Sync();
+
+            //then
+            _dbProxy.DidNotReceive().TransactionLogKayitSil(ornekTransactionLogKayitlari[0]);
+        }
 
 		[Test]
 		public void hedefte_islem_basarisiz_olursa_transaction_log_kaydi_silinmez_hata_mesaji_eklenir()//insert veya update
@@ -108,17 +149,25 @@ namespace AdaDataSync.Test
             Assert.Throws<Exception>(() => _service.Sync());
         }
 
+        [Test]
+        public void cari_program_guncellemeye_basladiysa_dbProxynin_bekleyen_islemleri_alinmaz_ve_sync_metodu_exception_atar()
+        {
+            _dbProxy.FoxproTarafindaGuncellemeYapiliyor().Returns(true);
+            Assert.Throws<Exception>(() => _service.Sync());
+            _dbProxy.DidNotReceiveWithAnyArgs().BekleyenTransactionlariAl(10000);
+        }
+
 		private static List<DataTransactionInfo> ornekTransactionLogKayitlariYarat(int adet)
 		{
 			List<DataTransactionInfo> kayitlar = new List<DataTransactionInfo>();
 		    for (int i = 0; i < adet; i++)
-		        kayitlar.Add(new DataTransactionInfo(5 + i, "pol", "fprkpol", 11234 + 2*i));
+		        kayitlar.Add(new DataTransactionInfo(5 + i, "pol", "fprkpol", 11234 + 2*i, "i", false));
 			return kayitlar;
 		}
 
 		private DataTransactionInfo tekTransactionluTestOrtamiHazirla(Kayit kaynaktakiKayit)
 		{
-			DataTransactionInfo transactionInfo = new DataTransactionInfo(7, "pol", "fprkpol", 12345);
+			DataTransactionInfo transactionInfo = new DataTransactionInfo(7, "pol", "fprkpol", 12345, "i", false);
 			_dbProxy.BekleyenTransactionlariAl(0).ReturnsForAnyArgs(new List<DataTransactionInfo> {transactionInfo});
 			_dbProxy.KaynaktanTekKayitAl(transactionInfo).Returns(kaynaktakiKayit);
 			return transactionInfo;

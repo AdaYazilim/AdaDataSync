@@ -10,7 +10,7 @@ namespace AdaDataSync.API
             const string path = @"hata.txt";
             using (StreamWriter sw = new StreamWriter(path, true))
             {
-                sw.WriteLine(exception.ToString());
+                sw.WriteLine(DateTime.Now.ToString() + " / " + exception.ToString());
             }
         }
     }

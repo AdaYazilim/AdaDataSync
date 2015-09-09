@@ -16,14 +16,19 @@ namespace AdaDataSync.API
 
         public void Sync()
         {
+            if (_dbProxy.FoxproTarafindaGuncellemeYapiliyor())
+                throw new Exception("Güncelleme yapılıyor. Güncelleme bittikten sonra sync devam edecek.");
+
             List<DataTransactionInfo> trInfolar = _dbProxy.BekleyenTransactionlariAl(_syncEdilecekMaxKayitSayisi);
-            Console.WriteLine(string.Format("Aktarılmaya çalışılacak kayıt adedi : {0}", trInfolar.Count));
+            Console.WriteLine("Aktarılmaya çalışılacak kayıt adedi : {0}", trInfolar.Count);
 
             foreach (DataTransactionInfo logKaydi in trInfolar)
             {
                 try
                 {
                     tekLogKaydiniIsle(logKaydi);
+                    _dbProxy.TrLogKaydiniSqleAktar(logKaydi);
+                    _dbProxy.TransactionLogKayitSil(logKaydi);
                 }
                 catch (Exception ex)
                 {
@@ -40,8 +45,6 @@ namespace AdaDataSync.API
                 _dbProxy.HedeftenKayitSil(logKaydi);
             else
                 _dbProxy.HedefteInsertVeyaUpdate(kaynaktakiKayit, logKaydi);
-
-            _dbProxy.TransactionLogKayitSil(logKaydi);
         }
     }
 }
