@@ -82,7 +82,7 @@ namespace AdaDataSync.API
                         dr["prkalanadi"].ToString().Trim().ToLowerInvariant(),
                         (int)dr["prkdeger"],
                         dr["islemtipi"].ToString().Trim(),
-                        (bool)dr["oncekitur"]
+                        dr["oncekitur"] != DBNull.Value && (bool)dr["oncekitur"]
                         )
                    ).ToList();
         }
