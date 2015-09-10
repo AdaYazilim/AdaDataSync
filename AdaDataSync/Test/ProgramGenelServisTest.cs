@@ -105,5 +105,8 @@ namespace AdaDataSync.Test
             _dataSyncServis.When(ds => ds.Sync()).Do(x => Thread.Sleep(BeklemeSuresi));
             calistirma_metoduna_parametre_gonderilmezse_sync_metodu_belirli_zaman_araliklariyla_tekrar_tekrar_calismali();
         }
+
+        //[Test]
+        //public void her_turda_sync_yapmadan_once_ddlog_tablosundaki_structure_degisikliklerine_bakarak_
     }
 }

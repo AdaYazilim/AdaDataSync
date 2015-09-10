@@ -1,26 +1,64 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using AdaVeriKatmani;
 
 namespace AdaDataSync.API
 {
-	public class DatabaseProxy : IDatabaseProxy
+	public class DatabaseProxy:IDatabaseProxy
 	{
         private readonly ITekConnectionVeriIslemleri _kaynakVeriIslemleri;
         private readonly ITekConnectionVeriIslemleri _hedefVeriIslemleri;
+        private bool _kaynakBaglantiAcik;
+        private bool _hedefBaglantiAcik;
 
         public DatabaseProxy(ITekConnectionVeriIslemleri kaynakVeriIslemleri, ITekConnectionVeriIslemleri hedefVeriIslemleri)
 		{
             _kaynakVeriIslemleri = kaynakVeriIslemleri;
 			_hedefVeriIslemleri = hedefVeriIslemleri;
+            _kaynakBaglantiAcik = false;
+            _hedefBaglantiAcik = false;
+
+            baglantilariAc();
 		}
+
+	    private void baglantilariAc()
+	    {
+	        if (_kaynakBaglantiAcik)
+	            throw new Exception("Kaynak bağlantı açık iken tekrar açılamaz.");
+
+            if (_hedefBaglantiAcik)
+                throw new Exception("Hedef bağlantı açık iken tekrar açılamaz.");
+
+	        _kaynakVeriIslemleri.BaglantiAc();
+            _kaynakBaglantiAcik = true;
+
+	        _hedefVeriIslemleri.BaglantiAc();
+            _hedefBaglantiAcik = true;
+	    }
+
+	    private void baglantilariKapat()
+        {
+            if (!_kaynakBaglantiAcik)
+                throw new Exception("Kaynak bağlantı kapalı iken tekrar kapatılamaz.");
+
+            if (!_hedefBaglantiAcik)
+                throw new Exception("Hedef bağlantı kapalı iken tekrar kapatılamaz.");
+
+            _kaynakVeriIslemleri.BaglantiKapat();
+            _kaynakBaglantiAcik = false;
+
+            _hedefVeriIslemleri.BaglantiKapat();
+            _hedefBaglantiAcik = false;
+        }
 
 	    public bool FoxproTarafindaGuncellemeYapiliyor()
 	    {
+            if (!_kaynakBaglantiAcik)
+                throw new Exception("Kaynak bağlantı açılmış olmalı.");
+
             string pathName = Path.GetDirectoryName(_kaynakVeriIslemleri.DataSource);
 	        if (string.IsNullOrWhiteSpace(pathName))
 	            throw new Exception("_kaynakVeriIslemleri.DataSource boş olmamalı.");
@@ -31,7 +69,11 @@ namespace AdaDataSync.API
 
 	    public List<DataTransactionInfo> BekleyenTransactionlariAl(int kayitSayisi)
 		{
-		    DataTable dt = _kaynakVeriIslemleri.Doldur("select top " + kayitSayisi + " * from trlog order by oncekitur desc, fprktrlog2");
+            if (!_kaynakBaglantiAcik)
+                throw new Exception("Kaynak bağlantı açılmış olmalı.");
+
+            DataTable dt = _kaynakVeriIslemleri.Doldur("select top " + kayitSayisi + " * from trlog order by oncekitur desc, fprktrlog2");
+            dt = _kaynakVeriIslemleri.Doldur("select top " + kayitSayisi + " * from trlog order by oncekitur desc, fprktrlog2");
 
 			return (from DataRow dr in dt.Rows 
                     select new DataTransactionInfo
@@ -48,6 +90,9 @@ namespace AdaDataSync.API
 
 		public Kayit KaynaktanTekKayitAl(DataTransactionInfo transactionInfo)
 		{
+            if (!_kaynakBaglantiAcik)
+                throw new Exception("Kaynak bağlantı açılmış olmalı.");
+
 		    string komut = "select * from " + transactionInfo.TabloAdi + " where " + transactionInfo.PrimaryKeyKolonAdi + "=" + transactionInfo.PrimaryKeyDegeri;
 			DataTable dt = _kaynakVeriIslemleri.Doldur(komut);
 			if (dt.Rows.Count == 0)
@@ -57,12 +102,18 @@ namespace AdaDataSync.API
 
 		public void HedeftenKayitSil(DataTransactionInfo transactionInfo)
 		{
+            if (!_hedefBaglantiAcik)
+                throw new Exception("Hedef bağlantı açılmış olmalı.");
+
 		    string silmeKomutu = "delete from " + transactionInfo.TabloAdi + " where " + transactionInfo.PrimaryKeyKolonAdi + " = :1";
 		    _hedefVeriIslemleri.SorguDisi(silmeKomutu, transactionInfo.PrimaryKeyDegeri);
 		}
 
-		public void HedefteInsertVeyaUpdate(Kayit kaynaktakiKayit, DataTransactionInfo transactionInfo)
+	    public void HedefteInsertVeyaUpdate(Kayit kaynaktakiKayit, DataTransactionInfo transactionInfo)
 		{
+            if (!_hedefBaglantiAcik)
+                throw new Exception("Hedef bağlantı açılmış olmalı.");
+
 			_hedefVeriIslemleri.TekKayitGuncelle(transactionInfo.TabloAdi, transactionInfo.PrimaryKeyKolonAdi, transactionInfo.PrimaryKeyDegeri, kaynaktakiKayit.DataRowItemArray);
 			//new SqlDataAdapter()
 			//DataRow drKayit = kaynaktakiKayit.DataRow;
@@ -81,14 +132,31 @@ namespace AdaDataSync.API
 			////foxproTablosundanSil(foxproCon, fPrkTrLog);
 		}
 
-		public void TransactionLogKayitSil(DataTransactionInfo transactionLog)
+	    public void TrLogKaydiniSqleAktar(DataTransactionInfo transactionInfo)
+	    {
+            if (!_hedefBaglantiAcik)
+                throw new Exception("Hedef bağlantı açılmış olmalı.");
+
+	        DataTable dt = _hedefVeriIslemleri.Doldur("select * from trlog");
+
+	        const string insertKomutu = "insert into trlog (dosyaadi,prkalanadi,prkdeger,islemtipi,fprktrlog2,oncekitur,tarihsaat) values(:1,:2,:3,:4,:5,:6,:7)";
+	        _hedefVeriIslemleri.SorguDisi(insertKomutu, transactionInfo.TabloAdi, transactionInfo.PrimaryKeyKolonAdi, transactionInfo.PrimaryKeyDegeri, transactionInfo.IslemTipi, transactionInfo.PrkLog, transactionInfo.OncekiTur, DateTime.Now);
+	    }
+
+	    public void TransactionLogKayitSil(DataTransactionInfo transactionLog)
 		{
+            if (!_kaynakBaglantiAcik)
+                throw new Exception("Kaynak bağlantı açılmış olmalı.");
+
 		    string silmeKomutu = "delete from trlog where fprktrlog2 = " + transactionLog.PrkLog;
 		    _kaynakVeriIslemleri.SorguDisi(silmeKomutu);
 		}
 
-		public void TransactionLogKaydinaHataMesajiYaz(DataTransactionInfo transactionLog, Exception ex)
+	    public void TransactionLogKaydinaHataMesajiYaz(DataTransactionInfo transactionLog, Exception ex)
 		{
+            if (!_kaynakBaglantiAcik)
+                throw new Exception("Kaynak bağlantı açılmış olmalı.");
+
 		    string hataMesaji= ex.Message;
 
 		    if (hataMesaji.Length > 100)
@@ -98,10 +166,9 @@ namespace AdaDataSync.API
 		    _kaynakVeriIslemleri.SorguDisi(updateKomut, hataMesaji);
 		}
 
-	    public void TrLogKaydiniSqleAktar(DataTransactionInfo transactionInfo)
+	    ~DatabaseProxy()
 	    {
-	        const string insertKomutu = "insert into trlog (dosyaadi,prkalanadi,prkdeger,islemtipi,fprktrlog2,oncekitur,tarihsaat) values(:1,:2,:3,:4,:5,:6,:7)";
-	        _hedefVeriIslemleri.SorguDisi(insertKomutu, transactionInfo.TabloAdi, transactionInfo.PrimaryKeyKolonAdi, transactionInfo.PrimaryKeyDegeri, transactionInfo.IslemTipi, transactionInfo.PrkLog, transactionInfo.OncekiTur, DateTime.Now);
+            baglantilariKapat();
 	    }
 	}
 }

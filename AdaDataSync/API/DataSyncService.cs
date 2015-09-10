@@ -17,7 +17,10 @@ namespace AdaDataSync.API
         public void Sync()
         {
             if (_dbProxy.FoxproTarafindaGuncellemeYapiliyor())
+            {
+                Console.WriteLine("Lütfen bekleyin. Veritabanı düzenlemesi yapılıyor.");
                 throw new Exception("Güncelleme yapılıyor. Güncelleme bittikten sonra sync devam edecek.");
+            }
 
             List<DataTransactionInfo> trInfolar = _dbProxy.BekleyenTransactionlariAl(_syncEdilecekMaxKayitSayisi);
             Console.WriteLine("Aktarılmaya çalışılacak kayıt adedi : {0}", trInfolar.Count);
