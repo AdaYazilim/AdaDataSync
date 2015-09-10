@@ -16,7 +16,7 @@ namespace AdaDataSync
             const string kaynakConfigString = "KaynakBaglantiString";
             const string hedefConfigString = "HedefBaglantiString";
 
-            for (int i = 0; ; i++)
+            for (int i = 1; ; i++)
             {
                 string kaynakConfig = kaynakConfigString + i;
                 string hedefConfig = hedefConfigString + i;
