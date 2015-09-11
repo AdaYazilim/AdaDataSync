@@ -128,7 +128,15 @@ namespace AdaDataSync.API
                 throw new Exception("Hedef bağlantı açılmış olmalı.");
 
 	        const string insertKomutu = "insert into trlog (dosyaadi,prkalanadi,prkdeger,islemtipi,fprktrlog2,oncekitur,tarihsaat) values(:1,:2,:3,:4,:5,:6,:7)";
-	        _hedefVeriIslemleri.SorguDisi(insertKomutu, transactionInfo.TabloAdi, transactionInfo.PrimaryKeyKolonAdi, transactionInfo.PrimaryKeyDegeri, transactionInfo.IslemTipi, transactionInfo.PrkLog, transactionInfo.OncekiTur, DateTime.Now);
+            try
+            {
+                _hedefVeriIslemleri.SorguDisi(insertKomutu, transactionInfo.TabloAdi, transactionInfo.PrimaryKeyKolonAdi, transactionInfo.PrimaryKeyDegeri, transactionInfo.IslemTipi, transactionInfo.PrkLog, transactionInfo.OncekiTur, DateTime.Now);
+            }
+            catch (Exception ex)
+            {
+                if (!ex.Message.StartsWith("Violation of PRIMARY KEY constraint "))
+                    throw;
+            }
 	    }
 
 	    public void TransactionLogKayitSil(DataTransactionInfo transactionLog)
