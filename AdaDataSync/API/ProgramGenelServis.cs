@@ -35,31 +35,41 @@ namespace AdaDataSync.API
             while (true)
             {
                 Stopwatch sw = Stopwatch.StartNew();
-
-                foreach (IDataSyncService dataSyncService in _syncService)
-                {
-                    try
-                    {
-                        dataSyncService.Sync();
-                    }
-                    catch (Exception ex)
-                    {
-                        _safetyLogger.HataLogla(ex);
-                    }
-                }
-
+                butunServisleriCalistir();
+                sw.Stop();
+                
                 calistirmaNo++;
 
-                sw.Stop();
                 if (calistirmaNo >= calistirmaSayisi && calistirmaSayisi > 0)
-                {
                     break;
-                }
-                else
-                {
-                    if(sw.ElapsedMilliseconds<_beklemeSuresi)
-                        System.Threading.Thread.Sleep(_beklemeSuresi - (int)sw.ElapsedMilliseconds);
-                }
+                
+                gerekliBeklemeyiYap(sw);
+            }
+        }
+
+        private void gerekliBeklemeyiYap(Stopwatch sw)
+        {
+            if (sw.ElapsedMilliseconds < _beklemeSuresi)
+                System.Threading.Thread.Sleep(_beklemeSuresi - (int) sw.ElapsedMilliseconds);
+        }
+
+        private void butunServisleriCalistir()
+        {
+            foreach (IDataSyncService dataSyncService in _syncService)
+            {
+                tekServisCalistir(dataSyncService);
+            }
+        }
+
+        private void tekServisCalistir(IDataSyncService dataSyncService)
+        {
+            try
+            {
+                dataSyncService.Sync();
+            }
+            catch (Exception ex)
+            {
+                _safetyLogger.HataLogla(ex);
             }
         }
     }
