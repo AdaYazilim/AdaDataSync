@@ -22,6 +22,11 @@ namespace AdaDataSync.API
                 return;
             }
 
+            verilariAktar();
+        }
+
+        private void verilariAktar()
+        {
             _dbProxy.BaglantilariAc();
 
             List<DataTransactionInfo> trInfolar = _dbProxy.BekleyenTransactionlariAl(_syncEdilecekMaxKayitSayisi);

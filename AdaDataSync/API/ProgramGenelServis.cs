@@ -8,20 +8,20 @@ namespace AdaDataSync.API
         private readonly ICalisanServisKontrolcusu _calisanServisKontrolcusu;
         private readonly ISafetyNetLogger _safetyLogger;
         private readonly int _beklemeSuresi;
-        private readonly IDataSyncService[] _syncService;
+        private readonly IDataSyncService[] _syncServices;
 
-        public ProgramGenelServis(ICalisanServisKontrolcusu calisanServisKontrolcusu, ISafetyNetLogger safetyLogger, params IDataSyncService[] syncService)
-            :this(calisanServisKontrolcusu, safetyLogger, 5000, syncService)
+        public ProgramGenelServis(ICalisanServisKontrolcusu calisanServisKontrolcusu, ISafetyNetLogger safetyLogger, params IDataSyncService[] syncServices)
+            :this(calisanServisKontrolcusu, safetyLogger, 5000, syncServices)
         {
 
         }
 
-        public ProgramGenelServis(ICalisanServisKontrolcusu calisanServisKontrolcusu, ISafetyNetLogger safetyLogger, int beklemeSuresi, params IDataSyncService[] syncService)
+        public ProgramGenelServis(ICalisanServisKontrolcusu calisanServisKontrolcusu, ISafetyNetLogger safetyLogger, int beklemeSuresi, params IDataSyncService[] syncServices)
         {
             _calisanServisKontrolcusu = calisanServisKontrolcusu;
             _safetyLogger = safetyLogger;
             _beklemeSuresi = beklemeSuresi;
-            _syncService = syncService;
+            _syncServices = syncServices;
         }
 
         public void Calistir(int calistirmaSayisi = 0)
@@ -55,7 +55,7 @@ namespace AdaDataSync.API
 
         private void butunServisleriCalistir()
         {
-            foreach (IDataSyncService dataSyncService in _syncService)
+            foreach (IDataSyncService dataSyncService in _syncServices)
             {
                 tekServisCalistir(dataSyncService);
             }
