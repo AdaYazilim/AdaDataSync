@@ -19,8 +19,10 @@ namespace AdaDataSync.API
             if (_dbProxy.FoxproTarafindaGuncellemeYapiliyor())
             {
                 Console.WriteLine("Lütfen bekleyin. Veritabanı düzenlemesi yapılıyor.");
-                throw new Exception("Güncelleme yapılıyor. Güncelleme bittikten sonra sync devam edecek.");
+                return;
             }
+
+            _dbProxy.BaglantilariAc();
 
             List<DataTransactionInfo> trInfolar = _dbProxy.BekleyenTransactionlariAl(_syncEdilecekMaxKayitSayisi);
             Console.WriteLine("Aktarılmaya çalışılacak kayıt adedi : {0}", trInfolar.Count);
@@ -38,6 +40,8 @@ namespace AdaDataSync.API
                     _dbProxy.TransactionLogKaydinaHataMesajiYaz(logKaydi, ex);
                 }
             }
+
+            _dbProxy.BaglantilariKapat();
         }
 
         private void tekLogKaydiniIsle(DataTransactionInfo logKaydi)

@@ -150,10 +150,9 @@ namespace AdaDataSync.Test
         }
 
         [Test]
-        public void cari_program_guncellemeye_basladiysa_dbProxynin_bekleyen_islemleri_alinmaz_ve_sync_metodu_exception_atar()
+        public void cari_program_guncellemeye_basladiysa_dbProxynin_bekleyen_islemleri_alinmaz()
         {
             _dbProxy.FoxproTarafindaGuncellemeYapiliyor().Returns(true);
-            Assert.Throws<Exception>(() => _service.Sync());
             _dbProxy.DidNotReceiveWithAnyArgs().BekleyenTransactionlariAl(10000);
         }
 

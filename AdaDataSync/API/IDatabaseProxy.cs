@@ -5,6 +5,8 @@ namespace AdaDataSync.API
 {
     public interface IDatabaseProxy
     {
+        void BaglantilariAc();
+        void BaglantilariKapat();
         bool FoxproTarafindaGuncellemeYapiliyor();
         List<DataTransactionInfo> BekleyenTransactionlariAl(int kayitSayisi);
         Kayit KaynaktanTekKayitAl(DataTransactionInfo transactionInfo);

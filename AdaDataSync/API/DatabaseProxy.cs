@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.IO;
 using System.Linq;
 using AdaVeriKatmani;
 
@@ -9,22 +8,22 @@ namespace AdaDataSync.API
 {
 	public class DatabaseProxy:IDatabaseProxy
 	{
+	    private readonly IGuncellemeKontrol _guncellemeKontrol;
         private readonly ITekConnectionVeriIslemleri _kaynakVeriIslemleri;
         private readonly ITekConnectionVeriIslemleri _hedefVeriIslemleri;
         private bool _kaynakBaglantiAcik;
         private bool _hedefBaglantiAcik;
 
-        public DatabaseProxy(ITekConnectionVeriIslemleri kaynakVeriIslemleri, ITekConnectionVeriIslemleri hedefVeriIslemleri)
+        public DatabaseProxy(IGuncellemeKontrol guncellemeKontrol, ITekConnectionVeriIslemleri kaynakVeriIslemleri, ITekConnectionVeriIslemleri hedefVeriIslemleri)
 		{
+            _guncellemeKontrol = guncellemeKontrol;
             _kaynakVeriIslemleri = kaynakVeriIslemleri;
 			_hedefVeriIslemleri = hedefVeriIslemleri;
             _kaynakBaglantiAcik = false;
             _hedefBaglantiAcik = false;
-
-            baglantilariAc();
 		}
 
-	    private void baglantilariAc()
+	    public void BaglantilariAc()
 	    {
 	        if (_kaynakBaglantiAcik)
 	            throw new Exception("Kaynak bağlantı açık iken tekrar açılamaz.");
@@ -39,7 +38,7 @@ namespace AdaDataSync.API
             _hedefBaglantiAcik = true;
 	    }
 
-	    private void baglantilariKapat()
+	    public void BaglantilariKapat()
         {
             if (!_kaynakBaglantiAcik)
                 throw new Exception("Kaynak bağlantı kapalı iken tekrar kapatılamaz.");
@@ -56,15 +55,7 @@ namespace AdaDataSync.API
 
 	    public bool FoxproTarafindaGuncellemeYapiliyor()
 	    {
-            if (!_kaynakBaglantiAcik)
-                throw new Exception("Kaynak bağlantı açılmış olmalı.");
-
-            string pathName = Path.GetDirectoryName(_kaynakVeriIslemleri.DataSource);
-            if (string.IsNullOrWhiteSpace(pathName))
-	            throw new Exception("_kaynakVeriIslemleri.DataSource boş olmamalı.");
-
-            string guncellemeTxtAdresi = Path.Combine(pathName, "GUNCELLEME.TXT");
-	        return File.Exists(guncellemeTxtAdresi);
+	        return _guncellemeKontrol.SuAndaGuncellemeYapiliyor();
 	    }
 
 	    public List<DataTransactionInfo> BekleyenTransactionlariAl(int kayitSayisi)
@@ -162,10 +153,5 @@ namespace AdaDataSync.API
             string updateKomut = "update trlog set hataacikla = :1 where fprktrlog2 = " + transactionLog.PrkLog;
 		    _kaynakVeriIslemleri.SorguDisi(updateKomut, hataMesaji);
 		}
-
-	    ~DatabaseProxy()
-	    {
-            baglantilariKapat();
-	    }
 	}
 }

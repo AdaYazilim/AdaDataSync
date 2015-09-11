@@ -32,8 +32,9 @@ namespace AdaDataSync
 
                 ITekConnectionVeriIslemleri tviKaynak = new TemelVeriIslemleri(VeritabaniTipi.FoxPro, kaynakBaglanti);
                 ITekConnectionVeriIslemleri tviHedef = new TemelVeriIslemleri(VeritabaniTipi.SqlServer, hedefBaglanti);
+                IGuncellemeKontrol guncellemeKontrol = new FoxproGuncellemeKontrol(kaynakBaglanti);
 
-                DatabaseProxy dp = new DatabaseProxy(tviKaynak, tviHedef);
+                DatabaseProxy dp = new DatabaseProxy(guncellemeKontrol, tviKaynak, tviHedef);
                 DataSyncService syncServis = new DataSyncService(dp);
                 syncServisler.Add(syncServis);
             }

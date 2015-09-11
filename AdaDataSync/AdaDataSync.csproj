@@ -52,7 +52,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="API\DataSyncService.cs" />
+    <Compile Include="API\GuncellemeKontrol.cs" />
     <Compile Include="API\IDataSyncService.cs" />
+    <Compile Include="API\IGuncellemeKontrol.cs" />
     <Compile Include="API\ISafetyNetLogger.cs" />
     <Compile Include="API\SafetyNetLogger.cs" />
     <Compile Include="API\CalisanServisKontrolcusu.cs" />
