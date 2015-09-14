@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Configuration;
+using System.Data.OleDb;
+using System.Data.SqlClient;
 using AdaDataSync.API;
 using AdaVeriKatmani;
 
@@ -32,10 +34,16 @@ namespace AdaDataSync
 
                 ITekConnectionVeriIslemleri tviKaynak = new TemelVeriIslemleri(VeritabaniTipi.FoxPro, kaynakBaglanti);
                 ITekConnectionVeriIslemleri tviHedef = new TemelVeriIslemleri(VeritabaniTipi.SqlServer, hedefBaglanti);
+                IDatabaseProxy dp = new DatabaseProxy(tviKaynak, tviHedef);
+                IVeritabaniIslemYapan veriAktaran = new VeriAktaran(dp);
+                
                 IGuncellemeKontrol guncellemeKontrol = new FoxproGuncellemeKontrol(kaynakBaglanti);
 
-                DatabaseProxy dp = new DatabaseProxy(guncellemeKontrol, tviKaynak, tviHedef);
-                DataSyncService syncServis = new DataSyncService(dp);
+                OleDbConnection foxproConnection = new OleDbConnection(kaynakBaglanti);
+                SqlConnection sqlConnection = new SqlConnection(hedefBaglanti);
+                IVeritabaniIslemYapan hedefVeritabaniGuncelleyen = new HedefVeritabaniGuncelleyen(foxproConnection, sqlConnection);
+
+                IDataSyncService syncServis = new DataSyncService(guncellemeKontrol, hedefVeritabaniGuncelleyen, veriAktaran);
                 syncServisler.Add(syncServis);
             }
 

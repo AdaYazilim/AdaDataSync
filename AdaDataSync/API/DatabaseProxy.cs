@@ -8,15 +8,13 @@ namespace AdaDataSync.API
 {
 	public class DatabaseProxy:IDatabaseProxy
 	{
-	    private readonly IGuncellemeKontrol _guncellemeKontrol;
         private readonly ITekConnectionVeriIslemleri _kaynakVeriIslemleri;
         private readonly ITekConnectionVeriIslemleri _hedefVeriIslemleri;
         private bool _kaynakBaglantiAcik;
         private bool _hedefBaglantiAcik;
 
-        public DatabaseProxy(IGuncellemeKontrol guncellemeKontrol, ITekConnectionVeriIslemleri kaynakVeriIslemleri, ITekConnectionVeriIslemleri hedefVeriIslemleri)
+        public DatabaseProxy(ITekConnectionVeriIslemleri kaynakVeriIslemleri, ITekConnectionVeriIslemleri hedefVeriIslemleri)
 		{
-            _guncellemeKontrol = guncellemeKontrol;
             _kaynakVeriIslemleri = kaynakVeriIslemleri;
 			_hedefVeriIslemleri = hedefVeriIslemleri;
             _kaynakBaglantiAcik = false;
@@ -52,11 +50,6 @@ namespace AdaDataSync.API
             _hedefVeriIslemleri.BaglantiKapat();
             _hedefBaglantiAcik = false;
         }
-
-	    public bool FoxproTarafindaGuncellemeYapiliyor()
-	    {
-	        return _guncellemeKontrol.SuAndaGuncellemeYapiliyor();
-	    }
 
 	    public List<DataTransactionInfo> BekleyenTransactionlariAl(int kayitSayisi)
 		{
@@ -122,7 +115,7 @@ namespace AdaDataSync.API
 			////foxproTablosundanSil(foxproCon, fPrkTrLog);
 		}
 
-	    public void TrLogKaydiniSqleAktar(DataTransactionInfo transactionInfo)
+	    public void LogKaydiniSqleAktar(DataTransactionInfo transactionInfo)
 	    {
             if (!_hedefBaglantiAcik)
                 throw new Exception("Hedef bağlantı açılmış olmalı.");
@@ -139,7 +132,7 @@ namespace AdaDataSync.API
             }
 	    }
 
-	    public void TransactionLogKayitSil(DataTransactionInfo transactionLog)
+	    public void LogKayitSil(DataTransactionInfo transactionLog)
 		{
             if (!_kaynakBaglantiAcik)
                 throw new Exception("Kaynak bağlantı açılmış olmalı.");
@@ -148,7 +141,7 @@ namespace AdaDataSync.API
 		    _kaynakVeriIslemleri.SorguDisi(silmeKomutu);
         }
 
-	    public void TransactionLogKaydinaHataMesajiYaz(DataTransactionInfo transactionLog, Exception ex)
+	    public void LogKaydinaHataMesajiYaz(DataTransactionInfo transactionLog, Exception ex)
 		{
             if (!_kaynakBaglantiAcik)
                 throw new Exception("Kaynak bağlantı açılmış olmalı.");

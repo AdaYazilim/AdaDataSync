@@ -9,7 +9,6 @@ namespace AdaDataSync.Test
     [TestFixture]
     public class DatabaseProxyTest
     {
-        private IGuncellemeKontrol _guncellemeKontrol;
         private ITekConnectionVeriIslemleri _kaynakVeriIslemleri;
         private ITekConnectionVeriIslemleri _hedefVeriIslemleri;
         private DatabaseProxy _dbProxy;
@@ -17,11 +16,10 @@ namespace AdaDataSync.Test
         [SetUp]
         public void TestSetUp()
         {
-            _guncellemeKontrol = Substitute.For<IGuncellemeKontrol>();
             _kaynakVeriIslemleri = Substitute.For<ITekConnectionVeriIslemleri>();
             _hedefVeriIslemleri = Substitute.For<ITekConnectionVeriIslemleri>();
 
-            _dbProxy = new DatabaseProxy(_guncellemeKontrol, _kaynakVeriIslemleri, _hedefVeriIslemleri);
+            _dbProxy = new DatabaseProxy(_kaynakVeriIslemleri, _hedefVeriIslemleri);
         }
         
         // Bu testi tek başına çalıştırınca geçiyor, toplu çalıştırıldığında patlıyor. Anlamadım!
@@ -57,19 +55,19 @@ namespace AdaDataSync.Test
         [Test]
         public void TrLogKaydiniSqleAktar_metodu_cagirildiginda_sql_baglantisi_acik_degilse_exception_atmali()
         {
-            Assert.Throws<Exception>(() => _dbProxy.TrLogKaydiniSqleAktar(Arg.Any<DataTransactionInfo>()));
+            Assert.Throws<Exception>(() => _dbProxy.LogKaydiniSqleAktar(Arg.Any<DataTransactionInfo>()));
         }
 
         [Test]
         public void TransactionLogKayitSil_metodu_cagirildiginda_foxpro_baglantisi_acik_degilse_exception_atmali()
         {
-            Assert.Throws<Exception>(() => _dbProxy.TransactionLogKayitSil(Arg.Any<DataTransactionInfo>()));
+            Assert.Throws<Exception>(() => _dbProxy.LogKayitSil(Arg.Any<DataTransactionInfo>()));
         }
 
         [Test]
         public void TransactionLogKaydinaHataMesajiYaz_metodu_cagirildiginda_foxpro_baglantisi_acik_degilse_exception_atmali()
         {
-            Assert.Throws<Exception>(() => _dbProxy.TransactionLogKaydinaHataMesajiYaz(Arg.Any<DataTransactionInfo>(), Arg.Any<Exception>()));
+            Assert.Throws<Exception>(() => _dbProxy.LogKaydinaHataMesajiYaz(Arg.Any<DataTransactionInfo>(), Arg.Any<Exception>()));
         }
 
         [Test]

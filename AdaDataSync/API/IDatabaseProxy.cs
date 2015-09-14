@@ -7,13 +7,12 @@ namespace AdaDataSync.API
     {
         void BaglantilariAc();
         void BaglantilariKapat();
-        bool FoxproTarafindaGuncellemeYapiliyor();
         List<DataTransactionInfo> BekleyenTransactionlariAl(int kayitSayisi);
         Kayit KaynaktanTekKayitAl(DataTransactionInfo transactionInfo);
         void HedeftenKayitSil(DataTransactionInfo transactionInfo);
         void HedefteInsertVeyaUpdate(Kayit kaynaktakiKayit, DataTransactionInfo transactionInfo);
-        void TransactionLogKayitSil(DataTransactionInfo transactionLog);
-        void TransactionLogKaydinaHataMesajiYaz(DataTransactionInfo transactionLog, Exception ex);
-        void TrLogKaydiniSqleAktar(DataTransactionInfo transactionInfo);
+        void LogKayitSil(DataTransactionInfo transactionLog);
+        void LogKaydinaHataMesajiYaz(DataTransactionInfo transactionLog, Exception ex);
+        void LogKaydiniSqleAktar(DataTransactionInfo transactionInfo);
     }
 }

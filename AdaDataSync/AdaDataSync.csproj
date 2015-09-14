@@ -32,6 +32,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AdaPublicGenel">
+      <HintPath>..\..\__OutputDLL\AdaPublicGenel.dll</HintPath>
+    </Reference>
     <Reference Include="AdaVeriKatmani">
       <HintPath>..\..\__OutputDLL\AdaVeriKatmani.dll</HintPath>
     </Reference>
@@ -51,15 +54,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="API\DataDefinitionInfo.cs" />
     <Compile Include="API\DataSyncService.cs" />
     <Compile Include="API\GuncellemeKontrol.cs" />
     <Compile Include="API\IDataSyncService.cs" />
     <Compile Include="API\IGuncellemeKontrol.cs" />
+    <Compile Include="API\IIslemYapan.cs" />
     <Compile Include="API\ISafetyNetLogger.cs" />
     <Compile Include="API\SafetyNetLogger.cs" />
     <Compile Include="API\CalisanServisKontrolcusu.cs" />
+    <Compile Include="API\VeriAktaran.cs" />
+    <Compile Include="HedefVeritabaniGuncelleyen.cs" />
     <Compile Include="Test\DatabaseProxyTest.cs" />
-    <Compile Include="Test\DataSyncServiceTest.cs" />
+    <Compile Include="Test\VeriAktaranTest.cs" />
     <Compile Include="API\DataTransactionInfo.cs" />
     <Compile Include="API\ICalisanServisKontrolcusu.cs" />
     <Compile Include="API\IDatabaseProxy.cs" />
