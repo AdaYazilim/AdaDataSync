@@ -9,7 +9,7 @@ namespace AdaDataSync
 {
     internal class Program
     {
-        private static void Main(string[] args)
+        private static void Main()
         {
             ICalisanServisKontrolcusu calisanServisKontrolcusu = new CalisanServisKontrolcusu();
             ISafetyNetLogger safetyNetLogger = new SafetyNetLogger();
