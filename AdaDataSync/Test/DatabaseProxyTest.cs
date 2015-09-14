@@ -12,14 +12,17 @@ namespace AdaDataSync.Test
         private ITekConnectionVeriIslemleri _kaynakVeriIslemleri;
         private ITekConnectionVeriIslemleri _hedefVeriIslemleri;
         private DatabaseProxy _dbProxy;
+	    private DataTransactionInfo _pol12345TransactionInfo;
 
-        [SetUp]
+	    [SetUp]
         public void TestSetUp()
         {
             _kaynakVeriIslemleri = Substitute.For<ITekConnectionVeriIslemleri>();
             _hedefVeriIslemleri = Substitute.For<ITekConnectionVeriIslemleri>();
 
             _dbProxy = new DatabaseProxy(_kaynakVeriIslemleri, _hedefVeriIslemleri);
+
+            _pol12345TransactionInfo = new DataTransactionInfo(7, "pol", "fprkpol", 12345, "i", false);
         }
         
         // Bu testi tek başına çalıştırınca geçiyor, toplu çalıştırıldığında patlıyor. Anlamadım!
@@ -27,47 +30,48 @@ namespace AdaDataSync.Test
         public void insert_veya_update_hedef_veri_islemlerinde_calistirilir()
         {
             Kayit kaynaktakiKayit = new Kayit(null);
-            DataTransactionInfo transactionInfo = new DataTransactionInfo(7, "pol", "fprkpol", 12345, "i", false);
-            _dbProxy.BaglantilariAc();
-            _dbProxy.HedefteInsertVeyaUpdate(kaynaktakiKayit, transactionInfo);
+
+			_dbProxy.BaglantilariAc();
+            _dbProxy.HedefteInsertVeyaUpdate(kaynaktakiKayit, _pol12345TransactionInfo);
             _dbProxy.BaglantilariKapat();
-            _hedefVeriIslemleri.ReceivedWithAnyArgs().TekKayitGuncelle(transactionInfo.TabloAdi, transactionInfo.PrimaryKeyKolonAdi, transactionInfo.PrimaryKeyDegeri, kaynaktakiKayit.DataRowItemArray);
+
+			_hedefVeriIslemleri.ReceivedWithAnyArgs().TekKayitGuncelle(_pol12345TransactionInfo.TabloAdi, _pol12345TransactionInfo.PrimaryKeyKolonAdi, _pol12345TransactionInfo.PrimaryKeyDegeri, kaynaktakiKayit.DataRowItemArray);
         }
 
         [Test]
         public void BekleyenTransactionlariAl_metodu_cagirildiginda_foxpro_baglantisi_acik_degilse_exception_atmali()
         {
-            Assert.Throws<Exception>(() => _dbProxy.BekleyenTransactionlariAl(Arg.Any<int>()));
+            Assert.Throws<Exception>(() => _dbProxy.BekleyenTransactionlariAl(0));
         }
 
         [Test]
         public void KaynaktanTekKayitAl_metodu_cagirildiginda_foxpro_baglantisi_acik_degilse_exception_atmali()
         {
-            Assert.Throws<Exception>(() => _dbProxy.KaynaktanTekKayitAl(Arg.Any<DataTransactionInfo>()));
+            Assert.Throws<Exception>(() => _dbProxy.KaynaktanTekKayitAl(_pol12345TransactionInfo));
         }
 
         [Test]
         public void HedeftenKayitSil_metodu_cagirildiginda_sql_baglantisi_acik_degilse_exception_atmali()
         {
-            Assert.Throws<Exception>(() => _dbProxy.HedeftenKayitSil(Arg.Any<DataTransactionInfo>()));
+            Assert.Throws<Exception>(() => _dbProxy.HedeftenKayitSil(_pol12345TransactionInfo));
         }
 
         [Test]
         public void TrLogKaydiniSqleAktar_metodu_cagirildiginda_sql_baglantisi_acik_degilse_exception_atmali()
         {
-            Assert.Throws<Exception>(() => _dbProxy.LogKaydiniSqleAktar(Arg.Any<DataTransactionInfo>()));
+            Assert.Throws<Exception>(() => _dbProxy.LogKaydiniSqleAktar(_pol12345TransactionInfo));
         }
 
         [Test]
         public void TransactionLogKayitSil_metodu_cagirildiginda_foxpro_baglantisi_acik_degilse_exception_atmali()
         {
-            Assert.Throws<Exception>(() => _dbProxy.LogKayitSil(Arg.Any<DataTransactionInfo>()));
+            Assert.Throws<Exception>(() => _dbProxy.LogKayitSil(_pol12345TransactionInfo));
         }
 
         [Test]
         public void TransactionLogKaydinaHataMesajiYaz_metodu_cagirildiginda_foxpro_baglantisi_acik_degilse_exception_atmali()
         {
-            Assert.Throws<Exception>(() => _dbProxy.LogKaydinaHataMesajiYaz(Arg.Any<DataTransactionInfo>(), Arg.Any<Exception>()));
+            Assert.Throws<Exception>(() => _dbProxy.LogKaydinaHataMesajiYaz(_pol12345TransactionInfo, new Exception()));
         }
 
         [Test]
