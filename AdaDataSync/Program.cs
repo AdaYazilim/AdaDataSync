@@ -23,14 +23,17 @@ namespace AdaDataSync
                 string kaynakConfig = kaynakConfigString + i;
                 string hedefConfig = hedefConfigString + i;
 
-                string kaynakBaglanti = ConfigurationManager.AppSettings[kaynakConfig].Trim();
-                string hedefBaglanti = ConfigurationManager.AppSettings[hedefConfig].Trim();
+                string kaynakBaglanti = ConfigurationManager.AppSettings[kaynakConfig];
+                string hedefBaglanti = ConfigurationManager.AppSettings[hedefConfig];
 
                 if (string.IsNullOrWhiteSpace(kaynakBaglanti) && string.IsNullOrWhiteSpace(hedefBaglanti))
                     break;
 
                 if (string.IsNullOrWhiteSpace(kaynakBaglanti) || string.IsNullOrWhiteSpace(hedefBaglanti))
                     continue;
+
+                kaynakBaglanti = kaynakBaglanti.Trim();
+                hedefBaglanti = hedefBaglanti.Trim();
 
                 ITekConnectionVeriIslemleri tviKaynak = new TemelVeriIslemleri(VeritabaniTipi.FoxPro, kaynakBaglanti);
                 ITekConnectionVeriIslemleri tviHedef = new TemelVeriIslemleri(VeritabaniTipi.SqlServer, hedefBaglanti);
