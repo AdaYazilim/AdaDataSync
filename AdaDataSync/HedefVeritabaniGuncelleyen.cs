@@ -47,6 +47,7 @@ namespace AdaDataSync
                 foreach (IGrouping<string, DataDefinitionInfo> g in ddiler)
                 {
                     string tabloAdi = g.Key;
+
                     IEnumerable<DataDefinitionInfo> tabloDdiler = g;
                     DataRow[] tabloKolonlari = fpKolonlar.Select("table_name='" + tabloAdi + "'");
                     tablonunIslemleriniYap(tabloAdi, tabloDdiler, tabloKolonlari);
@@ -76,27 +77,30 @@ namespace AdaDataSync
             string[] hedefKolonlar = null;
             foreach (DataDefinitionInfo ddi in ddiler)
             {
-                if (ilk)
+                if (ddi.TabloAdi.ToLowerInvariant() != "ddlog" && ddi.TabloAdi.ToLowerInvariant() != "trlog")
                 {
-                    if (string.IsNullOrWhiteSpace(ddi.DegisenAlanAdi))
+                    if (ilk)
                     {
-                        tabloyuTumuyleGuncelle(tabloAdi, kaynakTabloKolonlari);
+                        if (string.IsNullOrWhiteSpace(ddi.DegisenAlanAdi))
+                        {
+                            tabloyuTumuyleGuncelle(tabloAdi, kaynakTabloKolonlari);
+                        }
+                        else
+                        {
+                            SqlCommand command = _sqlConnection.CreateCommand();
+                            command.CommandText = "select * from " + tabloAdi + " where 1=2";
+                            DataTable dtHedefKolonlar = new DataTable();
+                            new SqlDataAdapter(command).Fill(dtHedefKolonlar);
+                            hedefKolonlar = dtHedefKolonlar.Columns.Cast<DataColumn>().Select(dc => dc.ColumnName.ToLowerInvariant()).ToArray();
+                            tabloAlaniniGuncelle(ddi, kaynakTabloKolonlari, hedefKolonlar);
+                        }
+
+                        ilk = false;
                     }
                     else
                     {
-                        SqlCommand command = _sqlConnection.CreateCommand();
-                        command.CommandText = "select * from " + tabloAdi + " where 1=2";
-                        DataTable dtHedefKolonlar = new DataTable();
-                        new SqlDataAdapter(command).Fill(dtHedefKolonlar);
-                        hedefKolonlar = dtHedefKolonlar.Columns.Cast<DataColumn>().Select(dc => dc.ColumnName.ToLowerInvariant()).ToArray();
                         tabloAlaniniGuncelle(ddi, kaynakTabloKolonlari, hedefKolonlar);
-                    }
-
-                    ilk = false;
-                }
-                else
-                {
-                    tabloAlaniniGuncelle(ddi, kaynakTabloKolonlari, hedefKolonlar);
+                    }    
                 }
 
                 ddlogKaydiniSil(ddi);
