@@ -77,6 +77,10 @@ namespace AdaDataSync
             string[] hedefKolonlar = null;
             foreach (DataDefinitionInfo ddi in ddiler)
             {
+                // trlog'un ddi'sinin sql'e aktarılmasına gerek yok. Çünkü yine bu program sql'deki trlog'a işini bitirdiklerini log atıyor. 
+                // sql'deki trlog'da burası sebepli otomatik bir structure değişikliği olursa oraya kayıt atan class otomatik değişmeyeceği için 
+                // hata oluşur. Foxpro'daki trlog değişirse elle müdahale gerekecek.
+                // w_exists_tbl ise structure olarak aktarılmalı.
                 if (ddi.TabloAdi.ToLowerInvariant() != "ddlog" && ddi.TabloAdi.ToLowerInvariant() != "trlog")
                 {
                     if (ilk)
