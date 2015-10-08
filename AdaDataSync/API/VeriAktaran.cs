@@ -28,7 +28,7 @@ namespace AdaDataSync.API
                     try
                     {
                         // ddlog kayıtları senkronize edilmeyecek.
-                        if (logKaydi.TabloAdi.ToLowerInvariant() != "ddlog" && logKaydi.TabloAdi.ToLowerInvariant() != "w_exists_tbl")
+                        if (logKaydi.TabloAdi != "ddlog" && logKaydi.TabloAdi != "w_exists_tbl")
                         {
                             tekLogKaydiniIsle(logKaydi);
                             _dbProxy.LogKaydiniSqleAktar(logKaydi);
@@ -50,9 +50,6 @@ namespace AdaDataSync.API
 
         private void tekLogKaydiniIsle(DataTransactionInfo logKaydi)
         {
-            if (logKaydi.TabloAdi.ToLowerInvariant() == "ddlog")
-                return;
-
             Kayit kaynaktakiKayit = _dbProxy.KaynaktanTekKayitAl(logKaydi);
 
             if (kaynaktakiKayit == null)

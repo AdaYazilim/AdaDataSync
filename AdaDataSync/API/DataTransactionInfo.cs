@@ -12,10 +12,10 @@
         public DataTransactionInfo(int prkLog, string tabloAdi, string primaryKeyKolonAdi, int primaryKeyDegeri, string islemTipi, bool oncekiTur)
         {
             PrkLog = prkLog;
-            TabloAdi = tabloAdi;
-            PrimaryKeyKolonAdi = primaryKeyKolonAdi;
+            TabloAdi = tabloAdi.Trim().ToLowerInvariant();
+            PrimaryKeyKolonAdi = primaryKeyKolonAdi.Trim().ToLowerInvariant();
             PrimaryKeyDegeri = primaryKeyDegeri;
-            IslemTipi = islemTipi;
+            IslemTipi = islemTipi.Trim();
             OncekiTur = oncekiTur;
         }
     }

@@ -62,10 +62,10 @@ namespace AdaDataSync.API
                     select new DataTransactionInfo
                         (
                         (int)dr["fprktrlog2"],
-                        dr["dosyaadi"].ToString().Trim().ToLowerInvariant(),
-                        dr["prkalanadi"].ToString().Trim().ToLowerInvariant(),
+                        dr["dosyaadi"].ToString(),
+                        dr["prkalanadi"].ToString(),
                         (int)dr["prkdeger"],
-                        dr["islemtipi"].ToString().Trim(),
+                        dr["islemtipi"].ToString(),
                         dr["oncekitur"] != DBNull.Value && (bool)dr["oncekitur"]
                         )
                    ).ToList();
