@@ -3,26 +3,28 @@ using System.IO;
 
 namespace AdaDataSync.API
 {
-    class SafetyNetLogger : ISafetyNetLogger
+    public class TextDosyasiLogger : ILogger
     {
-        private string _sonHataMesaji = string.Empty;
+        private readonly string _dosyaAdresi;
+        private string _sonLogMesaji = string.Empty;
 
-        public void HataLogla(Exception exception)
+        public TextDosyasiLogger(string dosyaAdresi)
         {
+            _dosyaAdresi = dosyaAdresi;
+        }
 
-            const string path = @"hata.txt";
-            using (StreamWriter sw = new StreamWriter(path, true))
+        public void Logla(string logMesaji)
+        {
+            using (StreamWriter sw = new StreamWriter(_dosyaAdresi, true))
             {
-                string hataMesaji = exception.ToString();
-
-                if (hataMesaji == _sonHataMesaji) // belli bir hatayı her seferinde atmaya başladığında hata.txt dosyası büyüyor. 
+                if (logMesaji == _sonLogMesaji) // belli bir hatayı her seferinde atmaya başladığında hata.txt dosyası büyüyor. 
                 {
                     sw.WriteLine(DateTime.Now.ToString() + " / Aynısı");
                 }
                 else
                 {
-                    sw.WriteLine(DateTime.Now.ToString() + " / " + hataMesaji);
-                    _sonHataMesaji = hataMesaji;
+                    sw.WriteLine(DateTime.Now.ToString() + " / " + logMesaji);
+                    _sonLogMesaji = logMesaji;
                 }
             }
         }

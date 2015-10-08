@@ -6,17 +6,17 @@ namespace AdaDataSync.API
     internal class ProgramGenelServis
     {
         private readonly ICalisanServisKontrolcusu _calisanServisKontrolcusu;
-        private readonly ISafetyNetLogger _safetyLogger;
+        private readonly ILogger _safetyLogger;
         private readonly int _beklemeSuresi;
         private readonly IDataSyncService[] _syncServices;
 
-        public ProgramGenelServis(ICalisanServisKontrolcusu calisanServisKontrolcusu, ISafetyNetLogger safetyLogger, params IDataSyncService[] syncServices)
+        public ProgramGenelServis(ICalisanServisKontrolcusu calisanServisKontrolcusu, ILogger safetyLogger, params IDataSyncService[] syncServices)
             :this(calisanServisKontrolcusu, safetyLogger, 5000, syncServices)
         {
 
         }
 
-        public ProgramGenelServis(ICalisanServisKontrolcusu calisanServisKontrolcusu, ISafetyNetLogger safetyLogger, int beklemeSuresi, params IDataSyncService[] syncServices)
+        public ProgramGenelServis(ICalisanServisKontrolcusu calisanServisKontrolcusu, ILogger safetyLogger, int beklemeSuresi, params IDataSyncService[] syncServices)
         {
             _calisanServisKontrolcusu = calisanServisKontrolcusu;
             _safetyLogger = safetyLogger;
@@ -69,7 +69,7 @@ namespace AdaDataSync.API
             }
             catch (Exception ex)
             {
-                _safetyLogger.HataLogla(ex);
+                _safetyLogger.Logla(ex.Message);
             }
         }
     }

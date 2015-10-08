@@ -18,5 +18,10 @@
             IslemTipi = islemTipi.Trim();
             OncekiTur = oncekiTur;
         }
+
+        public override string ToString()
+        {
+            return string.Format("PrkLog={0}, TabloAdi={1}, PrimaryKeyKolonAdi={2}, PrimaryKeyDegeri={3}", PrkLog, TabloAdi, PrimaryKeyKolonAdi, PrimaryKeyDegeri);
+        }
     }
 }

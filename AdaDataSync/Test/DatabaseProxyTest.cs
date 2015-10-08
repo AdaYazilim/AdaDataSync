@@ -19,8 +19,9 @@ namespace AdaDataSync.Test
         {
             _kaynakVeriIslemleri = Substitute.For<ITekConnectionVeriIslemleri>();
             _hedefVeriIslemleri = Substitute.For<ITekConnectionVeriIslemleri>();
+	        ILogger logger = Substitute.For<ILogger>();
 
-            _dbProxy = new DatabaseProxy(_kaynakVeriIslemleri, _hedefVeriIslemleri);
+            _dbProxy = new DatabaseProxy(_kaynakVeriIslemleri, _hedefVeriIslemleri, logger);
 
             _pol12345TransactionInfo = new DataTransactionInfo(7, "pol", "fprkpol", 12345, "i", false);
         }

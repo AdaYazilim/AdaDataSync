@@ -58,7 +58,7 @@
     <Compile Include="API\IDataSyncService.cs" />
     <Compile Include="API\IGuncellemeKontrol.cs" />
     <Compile Include="API\IIslemYapan.cs" />
-    <Compile Include="API\ISafetyNetLogger.cs" />
+    <Compile Include="API\ILogger.cs" />
     <Compile Include="API\SafetyNetLogger.cs" />
     <Compile Include="API\CalisanServisKontrolcusu.cs" />
     <Compile Include="API\VeriAktaran.cs" />

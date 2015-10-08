@@ -10,7 +10,7 @@ namespace AdaDataSync.Test
     class ProgramGenelServisTest
     {
         private ICalisanServisKontrolcusu _calisanServisKontrolcusu;
-        private ISafetyNetLogger _safetyLogger;
+        private ILogger _safetyLogger;
         private IDataSyncService _dataSyncServis;
         private ProgramGenelServis _programGenelServis;
         private const int BeklemeSuresi = 100;
@@ -19,7 +19,7 @@ namespace AdaDataSync.Test
         public void TestSetup()
         {
             _calisanServisKontrolcusu = Substitute.For<ICalisanServisKontrolcusu>();
-            _safetyLogger = Substitute.For<ISafetyNetLogger>();
+            _safetyLogger = Substitute.For<ILogger>();
             _dataSyncServis = Substitute.For<IDataSyncService>();
             _programGenelServis = new ProgramGenelServis(_calisanServisKontrolcusu, _safetyLogger, BeklemeSuresi, _dataSyncServis);
         }
@@ -62,7 +62,7 @@ namespace AdaDataSync.Test
             _dataSyncServis.When(ds => ds.Sync()).Do(x => { throw ex; });
 
             Assert.DoesNotThrow(() => _programGenelServis.Calistir(1));
-            _safetyLogger.Received().HataLogla(ex);
+            _safetyLogger.Received().Logla(ex.Message);
         }
 
         [Test]
@@ -70,7 +70,7 @@ namespace AdaDataSync.Test
         {
             ICalisanServisKontrolcusu csk = Substitute.For<ICalisanServisKontrolcusu>();
             csk.BuMakinadaBaskaServisCalisiyorMu().Returns(false);
-            ISafetyNetLogger snl = Substitute.For<ISafetyNetLogger>();
+            ILogger snl = Substitute.For<ILogger>();
             IDataSyncService syncServis1 = Substitute.For<IDataSyncService>();
             IDataSyncService syncServis2 = Substitute.For<IDataSyncService>();
 
