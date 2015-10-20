@@ -9,14 +9,18 @@ namespace AdaDataSync.API
 	public class DatabaseProxy:IDatabaseProxy
 	{
         private readonly ITekConnectionVeriIslemleri _kaynakVeriIslemleri;
-        private readonly ITekConnectionVeriIslemleri _hedefVeriIslemleri;
-        private bool _kaynakBaglantiAcik;
-        private bool _hedefBaglantiAcik;
+	    private readonly ITekConnectionVeriIslemleri _hedefVeriIslemleri;
+	    private readonly ILogger _logger;
 
-        public DatabaseProxy(ITekConnectionVeriIslemleri kaynakVeriIslemleri, ITekConnectionVeriIslemleri hedefVeriIslemleri)
+	    private bool _kaynakBaglantiAcik;
+	    private bool _hedefBaglantiAcik;
+
+	    public DatabaseProxy(ITekConnectionVeriIslemleri kaynakVeriIslemleri, ITekConnectionVeriIslemleri hedefVeriIslemleri, ILogger logger)
 		{
             _kaynakVeriIslemleri = kaynakVeriIslemleri;
 			_hedefVeriIslemleri = hedefVeriIslemleri;
+	        _logger = logger;
+        
             _kaynakBaglantiAcik = false;
             _hedefBaglantiAcik = false;
 		}
@@ -62,10 +66,10 @@ namespace AdaDataSync.API
                     select new DataTransactionInfo
                         (
                         (int)dr["fprktrlog2"],
-                        dr["dosyaadi"].ToString().Trim().ToLowerInvariant(),
-                        dr["prkalanadi"].ToString().Trim().ToLowerInvariant(),
+                        dr["dosyaadi"].ToString(),
+                        dr["prkalanadi"].ToString(),
                         (int)dr["prkdeger"],
-                        dr["islemtipi"].ToString().Trim(),
+                        dr["islemtipi"].ToString(),
                         dr["oncekitur"] != DBNull.Value && (bool)dr["oncekitur"]
                         )
                    ).ToList();
@@ -138,7 +142,12 @@ namespace AdaDataSync.API
                 throw new Exception("Kaynak bağlantı açılmış olmalı.");
 
             string silmeKomutu = "delete from trlog where fprktrlog2 = " + transactionLog.PrkLog;
-		    _kaynakVeriIslemleri.SorguDisi(silmeKomutu);
+		    int silinenKayitSayisi = _kaynakVeriIslemleri.SorguDisi(silmeKomutu);
+	        if (silinenKayitSayisi > 1)
+	        {
+	            string hataMesaji = "Trlog dosyasından aynı fprktrlog2 değerinde 1'den fazla kayıt vardı. Silerken ortaya çıktı. 1.den sonraki kayıtlar senkronize edilmemiş olabilir:\n" + transactionLog.ToString();
+	            _logger.Logla(hataMesaji);
+	        }
         }
 
 	    public void LogKaydinaHataMesajiYaz(DataTransactionInfo transactionLog, Exception ex)

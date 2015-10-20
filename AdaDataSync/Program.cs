@@ -11,8 +11,6 @@ namespace AdaDataSync
     {
         private static void Main()
         {
-            ICalisanServisKontrolcusu calisanServisKontrolcusu = new CalisanServisKontrolcusu();
-            ISafetyNetLogger safetyNetLogger = new SafetyNetLogger();
             List<IDataSyncService> syncServisler = new List<IDataSyncService>();
 
             const string kaynakConfigString = "KaynakBaglantiString";
@@ -37,7 +35,8 @@ namespace AdaDataSync
 
                 ITekConnectionVeriIslemleri tviKaynak = new TemelVeriIslemleri(VeritabaniTipi.FoxPro, kaynakBaglanti);
                 ITekConnectionVeriIslemleri tviHedef = new TemelVeriIslemleri(VeritabaniTipi.SqlServer, hedefBaglanti);
-                IDatabaseProxy dp = new DatabaseProxy(tviKaynak, tviHedef);
+                ILogger logger = new TextDosyasiLogger("log_" + i + ".txt");
+                IDatabaseProxy dp = new DatabaseProxy(tviKaynak, tviHedef, logger);
                 IVeritabaniIslemYapan veriAktaran = new VeriAktaran(dp);
                 
                 IGuncellemeKontrol guncellemeKontrol = new FoxproGuncellemeKontrol(kaynakBaglanti);
@@ -50,6 +49,8 @@ namespace AdaDataSync
                 syncServisler.Add(syncServis);
             }
 
+            ICalisanServisKontrolcusu calisanServisKontrolcusu = new CalisanServisKontrolcusu();
+            ILogger safetyNetLogger = new TextDosyasiLogger("hata.txt");
             ProgramGenelServis genelServis = new ProgramGenelServis(calisanServisKontrolcusu, safetyNetLogger, syncServisler.ToArray());
             genelServis.Calistir();
         }

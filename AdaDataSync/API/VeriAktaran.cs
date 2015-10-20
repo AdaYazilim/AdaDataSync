@@ -16,26 +16,36 @@ namespace AdaDataSync.API
 
         public void VeritabaniIslemiYap()
         {
-            _dbProxy.BaglantilariAc();
-
-            List<DataTransactionInfo> trInfolar = _dbProxy.BekleyenTransactionlariAl(_syncEdilecekMaxKayitSayisi);
-            Console.WriteLine("Aktarılmaya çalışılacak kayıt adedi : {0}", trInfolar.Count);
-
-            foreach (DataTransactionInfo logKaydi in trInfolar)
+            try
             {
-                try
+                _dbProxy.BaglantilariAc();
+
+                List<DataTransactionInfo> trInfolar = _dbProxy.BekleyenTransactionlariAl(_syncEdilecekMaxKayitSayisi);
+                Console.WriteLine("Aktarılmaya çalışılacak kayıt adedi : {0}", trInfolar.Count);
+
+                foreach (DataTransactionInfo logKaydi in trInfolar)
                 {
-                    tekLogKaydiniIsle(logKaydi);
-                    _dbProxy.LogKaydiniSqleAktar(logKaydi);
-                    _dbProxy.LogKayitSil(logKaydi);
-                }
-                catch (Exception ex)
-                {
-                    _dbProxy.LogKaydinaHataMesajiYaz(logKaydi, ex);
+                    try
+                    {
+                        // ddlog kayıtları senkronize edilmeyecek.
+                        if (logKaydi.TabloAdi != "ddlog" && logKaydi.TabloAdi != "w_exists_tbl")
+                        {
+                            tekLogKaydiniIsle(logKaydi);
+                            _dbProxy.LogKaydiniSqleAktar(logKaydi);
+                        }
+
+                        _dbProxy.LogKayitSil(logKaydi);
+                    }
+                    catch (Exception ex)
+                    {
+                        _dbProxy.LogKaydinaHataMesajiYaz(logKaydi, ex);
+                    }
                 }
             }
-
-            _dbProxy.BaglantilariKapat();
+            finally
+            {
+                _dbProxy.BaglantilariKapat();
+            }
         }
 
         private void tekLogKaydiniIsle(DataTransactionInfo logKaydi)

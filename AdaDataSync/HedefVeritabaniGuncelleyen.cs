@@ -6,7 +6,6 @@ using System.Data.SqlClient;
 using System.Linq;
 using AdaDataSync.API;
 using AdaPublicGenel.Extensions;
-using AdaVeriKatmani;
 
 namespace AdaDataSync
 {
@@ -48,6 +47,7 @@ namespace AdaDataSync
                 foreach (IGrouping<string, DataDefinitionInfo> g in ddiler)
                 {
                     string tabloAdi = g.Key;
+
                     IEnumerable<DataDefinitionInfo> tabloDdiler = g;
                     DataRow[] tabloKolonlari = fpKolonlar.Select("table_name='" + tabloAdi + "'");
                     tablonunIslemleriniYap(tabloAdi, tabloDdiler, tabloKolonlari);
@@ -77,27 +77,34 @@ namespace AdaDataSync
             string[] hedefKolonlar = null;
             foreach (DataDefinitionInfo ddi in ddiler)
             {
-                if (ilk)
+                // trlog'un ddi'sinin sql'e aktarılmasına gerek yok. Çünkü yine bu program sql'deki trlog'a işini bitirdiklerini log atıyor. 
+                // sql'deki trlog'da burası sebepli otomatik bir structure değişikliği olursa oraya kayıt atan class otomatik değişmeyeceği için 
+                // hata oluşur. Foxpro'daki trlog değişirse elle müdahale gerekecek.
+                // w_exists_tbl ise structure olarak aktarılmalı.
+                if (ddi.TabloAdi.ToLowerInvariant() != "ddlog" && ddi.TabloAdi.ToLowerInvariant() != "trlog")
                 {
-                    if (string.IsNullOrWhiteSpace(ddi.DegisenAlanAdi))
+                    if (ilk)
                     {
-                        tabloyuTumuyleGuncelle(tabloAdi, kaynakTabloKolonlari);
+                        if (string.IsNullOrWhiteSpace(ddi.DegisenAlanAdi))
+                        {
+                            tabloyuTumuyleGuncelle(tabloAdi, kaynakTabloKolonlari);
+                        }
+                        else
+                        {
+                            SqlCommand command = _sqlConnection.CreateCommand();
+                            command.CommandText = "select * from " + tabloAdi + " where 1=2";
+                            DataTable dtHedefKolonlar = new DataTable();
+                            new SqlDataAdapter(command).Fill(dtHedefKolonlar);
+                            hedefKolonlar = dtHedefKolonlar.Columns.Cast<DataColumn>().Select(dc => dc.ColumnName.ToLowerInvariant()).ToArray();
+                            tabloAlaniniGuncelle(ddi, kaynakTabloKolonlari, hedefKolonlar);
+                        }
+
+                        ilk = false;
                     }
                     else
                     {
-                        SqlCommand command = _sqlConnection.CreateCommand();
-                        command.CommandText = VeriAraclar.SorgudakiStringAlanDisindaki_I_lari_i_Yap("select * from " + tabloAdi + " where 1=2");
-                        DataTable dtHedefKolonlar = new DataTable();
-                        new SqlDataAdapter(command).Fill(dtHedefKolonlar);
-                        hedefKolonlar = dtHedefKolonlar.Columns.Cast<DataColumn>().Select(dc => dc.ColumnName.ToLowerInvariant()).ToArray();
                         tabloAlaniniGuncelle(ddi, kaynakTabloKolonlari, hedefKolonlar);
-                    }
-
-                    ilk = false;
-                }
-                else
-                {
-                    tabloAlaniniGuncelle(ddi, kaynakTabloKolonlari, hedefKolonlar);
+                    }    
                 }
 
                 ddlogKaydiniSil(ddi);
@@ -117,7 +124,7 @@ namespace AdaDataSync
             kolonlarKomutString = kolonlarKomutString.Substring(1);
             string komut = "create table " + tabloAdi + " (" + kolonlarKomutString + ");";
             SqlCommand command = _sqlConnection.CreateCommand();
-            command.CommandText = VeriAraclar.SorgudakiStringAlanDisindaki_I_lari_i_Yap(komut);
+            command.CommandText = komut;
             command.ExecuteNonQuery();
         }
 
@@ -142,7 +149,7 @@ namespace AdaDataSync
             }
 
             SqlCommand command = _sqlConnection.CreateCommand();
-            command.CommandText = VeriAraclar.SorgudakiStringAlanDisindaki_I_lari_i_Yap(komut);
+            command.CommandText = komut;
             command.ExecuteNonQuery();
         }
 
@@ -150,7 +157,7 @@ namespace AdaDataSync
         {
             string silmeKomutu = "delete from ddlog where fprkddlog = " + ddi.FprkDdLog;
             OleDbCommand command = _foxproConnection.CreateCommand();
-            command.CommandText = VeriAraclar.SorgudakiStringAlanDisindaki_I_lari_i_Yap(silmeKomutu);
+            command.CommandText = silmeKomutu;
             command.ExecuteNonQuery();
         }
 
