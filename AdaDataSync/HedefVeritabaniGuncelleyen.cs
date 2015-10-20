@@ -6,6 +6,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using AdaDataSync.API;
 using AdaPublicGenel.Extensions;
+using AdaVeriKatmani;
 
 namespace AdaDataSync
 {
@@ -85,7 +86,7 @@ namespace AdaDataSync
                     else
                     {
                         SqlCommand command = _sqlConnection.CreateCommand();
-                        command.CommandText = "select * from " + tabloAdi + " where 1=2";
+                        command.CommandText = VeriAraclar.SorgudakiStringAlanDisindaki_I_lari_i_Yap("select * from " + tabloAdi + " where 1=2");
                         DataTable dtHedefKolonlar = new DataTable();
                         new SqlDataAdapter(command).Fill(dtHedefKolonlar);
                         hedefKolonlar = dtHedefKolonlar.Columns.Cast<DataColumn>().Select(dc => dc.ColumnName.ToLowerInvariant()).ToArray();
@@ -116,7 +117,7 @@ namespace AdaDataSync
             kolonlarKomutString = kolonlarKomutString.Substring(1);
             string komut = "create table " + tabloAdi + " (" + kolonlarKomutString + ");";
             SqlCommand command = _sqlConnection.CreateCommand();
-            command.CommandText = komut;
+            command.CommandText = VeriAraclar.SorgudakiStringAlanDisindaki_I_lari_i_Yap(komut);
             command.ExecuteNonQuery();
         }
 
@@ -141,7 +142,7 @@ namespace AdaDataSync
             }
 
             SqlCommand command = _sqlConnection.CreateCommand();
-            command.CommandText = komut;
+            command.CommandText = VeriAraclar.SorgudakiStringAlanDisindaki_I_lari_i_Yap(komut);
             command.ExecuteNonQuery();
         }
 
@@ -149,7 +150,7 @@ namespace AdaDataSync
         {
             string silmeKomutu = "delete from ddlog where fprkddlog = " + ddi.FprkDdLog;
             OleDbCommand command = _foxproConnection.CreateCommand();
-            command.CommandText = silmeKomutu;
+            command.CommandText = VeriAraclar.SorgudakiStringAlanDisindaki_I_lari_i_Yap(silmeKomutu);
             command.ExecuteNonQuery();
         }
 
