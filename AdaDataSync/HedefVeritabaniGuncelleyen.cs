@@ -39,8 +39,8 @@ namespace AdaDataSync
                     .Select(dr =>
                         new DataDefinitionInfo(
                             (int) dr["fprkddlog"],
-                            dr["dosyaadi"].ToString().Trim(),
-                            dr["alanAdi"].ToString().Trim()))
+                            dr["dosyaadi"].ToString().ToLowerInvariant().Trim(),
+                            dr["alanAdi"].ToString().ToLowerInvariant().Trim()))
                     .GroupBy(ddi => ddi.TabloAdi);
 
 
