@@ -4,10 +4,9 @@ using System.Data;
 using System.Data.OleDb;
 using System.Data.SqlClient;
 using System.Linq;
-using AdaDataSync.API;
 using AdaPublicGenel.Extensions;
 
-namespace AdaDataSync
+namespace AdaDataSync.API
 {
     internal class HedefVeritabaniGuncelleyen : IVeritabaniIslemYapan
     {

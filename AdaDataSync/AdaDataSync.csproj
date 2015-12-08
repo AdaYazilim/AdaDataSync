@@ -62,7 +62,7 @@
     <Compile Include="API\SafetyNetLogger.cs" />
     <Compile Include="API\CalisanServisKontrolcusu.cs" />
     <Compile Include="API\VeriAktaran.cs" />
-    <Compile Include="HedefVeritabaniGuncelleyen.cs" />
+    <Compile Include="API\HedefVeritabaniGuncelleyen.cs" />
     <Compile Include="Test\DatabaseProxyTest.cs" />
     <Compile Include="Test\VeriAktaranTest.cs" />
     <Compile Include="API\DataTransactionInfo.cs" />
