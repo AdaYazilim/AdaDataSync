@@ -72,7 +72,6 @@ namespace AdaDataSync.API
 
         private void tablonunIslemleriniYap(string tabloAdi, IEnumerable<DataDefinitionInfo> ddiler, DataRow[] kaynakTabloKolonlari)
         {
-            bool ilk = true;
             string[] hedefKolonlar = null;
             foreach (DataDefinitionInfo ddi in ddiler)
             {
@@ -82,28 +81,22 @@ namespace AdaDataSync.API
                 // w_exists_tbl ise structure olarak aktarılmalı.
                 if (ddi.TabloAdi.ToLowerInvariant() != "ddlog" && ddi.TabloAdi.ToLowerInvariant() != "trlog")
                 {
-                    if (ilk)
+                    if (string.IsNullOrWhiteSpace(ddi.DegisenAlanAdi))
                     {
-                        if (string.IsNullOrWhiteSpace(ddi.DegisenAlanAdi))
-                        {
-                            tabloyuTumuyleGuncelle(tabloAdi, kaynakTabloKolonlari);
-                        }
-                        else
+                        tabloyuTumuyleGuncelle(tabloAdi, kaynakTabloKolonlari);
+                    }
+                    else
+                    {
+                        if (hedefKolonlar==null)
                         {
                             SqlCommand command = _sqlConnection.CreateCommand();
                             command.CommandText = "select * from " + tabloAdi + " where 1=2";
                             DataTable dtHedefKolonlar = new DataTable();
                             new SqlDataAdapter(command).Fill(dtHedefKolonlar);
                             hedefKolonlar = dtHedefKolonlar.Columns.Cast<DataColumn>().Select(dc => dc.ColumnName.ToLowerInvariant()).ToArray();
-                            tabloAlaniniGuncelle(ddi, kaynakTabloKolonlari, hedefKolonlar);
                         }
-
-                        ilk = false;
-                    }
-                    else
-                    {
                         tabloAlaniniGuncelle(ddi, kaynakTabloKolonlari, hedefKolonlar);
-                    }    
+                    }
                 }
 
                 ddlogKaydiniSil(ddi);
