@@ -4,7 +4,7 @@ using System.Data;
 using System.Data.OleDb;
 using System.Data.SqlClient;
 using System.Linq;
-using AdaPublicGenel.Extensions;
+using AdaPublicGenel.Cesitli;
 
 namespace AdaDataSync.API
 {
@@ -155,74 +155,77 @@ namespace AdaDataSync.API
 
         private string kolonTipiniAl(DataRow drKolon, ref bool tablodaPrimaryKeyVar)
         {
-            string retVal;
+            // buradaki kodu adapublice aldım. Toplu aktarım programında da kullanılıyor.
+            return FoxproAlanTipindenSqlAlanTipiYaratan.SqlKolonTipiniAl(drKolon, false, ref tablodaPrimaryKeyVar);
 
-            if (drKolon["DATA_TYPE"].ToString() == "3") //int
-            {
-                bool columnHasDefault = (bool)drKolon["COLUMN_HASDEFAULT"];
-                if (columnHasDefault && !tablodaPrimaryKeyVar)
-                //if (columnHasDefault)
-                {
-                    tablodaPrimaryKeyVar = true;
-                    retVal = "[int] PRIMARY KEY";
-                }
-                else
-                {
-                    retVal = "[int]";
-                }
-            }
-            else if (drKolon["DATA_TYPE"].ToString() == "129" && drKolon["CHARACTER_MAXIMUM_LENGTH"].ToInt() < 5000) //string
-                retVal = "[varchar] (" + drKolon["CHARACTER_MAXIMUM_LENGTH"] + ")";
-            else if (drKolon["DATA_TYPE"].ToString() == "129") //string
-                retVal = "[text]";
-            else if (drKolon["DATA_TYPE"].ToString() == "5") //double  todo: burası problemli
-            {
-                //int prec = Araclar.ParseInt(drKolon["NUMERIC_PRECISION"].ToString());
-                //int scal = Araclar.ParseInt(drKolon["NUMERIC_SCALE"].ToString());
-                //if (scal == 0)
-                //{
-                //    prec += 3;
-                //    scal = 2;
-                //}
-                //return "[decimal] (" + prec + "," + scal + ") default 0";
+            //string retVal;
 
-                retVal = "[float]";
-            }
-            //return "[decimal] (18,2) default 0";
-            else if (drKolon["DATA_TYPE"].ToString() == "131") //double
-            {
+            //if (drKolon["DATA_TYPE"].ToString() == "3") //int
+            //{
+            //    bool columnHasDefault = (bool)drKolon["COLUMN_HASDEFAULT"];
+            //    if (columnHasDefault && !tablodaPrimaryKeyVar)
+            //    //if (columnHasDefault)
+            //    {
+            //        tablodaPrimaryKeyVar = true;
+            //        retVal = "[int] PRIMARY KEY";
+            //    }
+            //    else
+            //    {
+            //        retVal = "[int]";
+            //    }
+            //}
+            //else if (drKolon["DATA_TYPE"].ToString() == "129" && drKolon["CHARACTER_MAXIMUM_LENGTH"].ToInt() < 5000) //string
+            //    retVal = "[varchar] (" + drKolon["CHARACTER_MAXIMUM_LENGTH"] + ")";
+            //else if (drKolon["DATA_TYPE"].ToString() == "129") //string
+            //    retVal = "[text]";
+            //else if (drKolon["DATA_TYPE"].ToString() == "5") //double  todo: burası problemli
+            //{
+            //    //int prec = Araclar.ParseInt(drKolon["NUMERIC_PRECISION"].ToString());
+            //    //int scal = Araclar.ParseInt(drKolon["NUMERIC_SCALE"].ToString());
+            //    //if (scal == 0)
+            //    //{
+            //    //    prec += 3;
+            //    //    scal = 2;
+            //    //}
+            //    //return "[decimal] (" + prec + "," + scal + ") default 0";
 
-                int prec = drKolon["NUMERIC_PRECISION"].ToInt();
-                int scal = drKolon["NUMERIC_SCALE"].ToInt();
+            //    retVal = "[float]";
+            //}
+            ////return "[decimal] (18,2) default 0";
+            //else if (drKolon["DATA_TYPE"].ToString() == "131") //double
+            //{
 
-                prec += scal + 1;  // sebebini bilmiyorum. Buraya olduğundan eksik geliyor.
+            //    int prec = drKolon["NUMERIC_PRECISION"].ToInt();
+            //    int scal = drKolon["NUMERIC_SCALE"].ToInt();
 
-                retVal = "[decimal] (" + prec + "," + scal + ") default 0";
-            }
-            else if (drKolon["DATA_TYPE"].ToString() == "11") //bool
-            {
-                //return "[int]";
-                retVal = "[bit]";
-            }
-            else if (drKolon["DATA_TYPE"].ToString() == "133") //tarih
-                retVal = "[date]";
-            else if (drKolon["DATA_TYPE"].ToString() == "135") //tarih saat
-                retVal = "[datetime2]";
-            else if (drKolon["DATA_TYPE"].ToString() == "128") //varbinary
-            {
-                if (drKolon["CHARACTER_MAXIMUM_LENGTH"].ToInt() < 1500)
-                    retVal = "[varbinary] (" + drKolon["CHARACTER_MAXIMUM_LENGTH"] + ")";
-                else
-                    retVal = "[varbinary] (4000)";
-            }
-            else
-                retVal= "[nvarchar](max)";
+            //    prec += scal + 1;  // sebebini bilmiyorum. Buraya olduğundan eksik geliyor.
 
-            //bool nullable = (bool)drKolon["is_nullable"];
-            //string nullableEklentisi = nullable ? " NULL" : " NOT NULL";
+            //    retVal = "[decimal] (" + prec + "," + scal + ") default 0";
+            //}
+            //else if (drKolon["DATA_TYPE"].ToString() == "11") //bool
+            //{
+            //    //return "[int]";
+            //    retVal = "[bit]";
+            //}
+            //else if (drKolon["DATA_TYPE"].ToString() == "133") //tarih
+            //    retVal = "[date]";
+            //else if (drKolon["DATA_TYPE"].ToString() == "135") //tarih saat
+            //    retVal = "[datetime2]";
+            //else if (drKolon["DATA_TYPE"].ToString() == "128") //varbinary
+            //{
+            //    if (drKolon["CHARACTER_MAXIMUM_LENGTH"].ToInt() < 1500)
+            //        retVal = "[varbinary] (" + drKolon["CHARACTER_MAXIMUM_LENGTH"] + ")";
+            //    else
+            //        retVal = "[varbinary] (4000)";
+            //}
+            //else
+            //    retVal = "[nvarchar](max)";
 
-            //retVal += nullableEklentisi;
-            return retVal;
+            ////bool nullable = (bool)drKolon["is_nullable"];
+            ////string nullableEklentisi = nullable ? " NULL" : " NOT NULL";
+
+            ////retVal += nullableEklentisi;
+            //return retVal;
         }
     }
 }
