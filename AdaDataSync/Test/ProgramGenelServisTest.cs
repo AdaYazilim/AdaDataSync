@@ -10,8 +10,8 @@ namespace AdaDataSync.Test
     class ProgramGenelServisTest
     {
         private ICalisanServisKontrolcusu _calisanServisKontrolcusu;
-        private ILogger _safetyLogger;
         private IDataSyncService _dataSyncServis;
+        private ILogger _safetyLogger;
         private ProgramGenelServis _programGenelServis;
         private const int BeklemeSuresi = 100;
 
@@ -19,9 +19,12 @@ namespace AdaDataSync.Test
         public void TestSetup()
         {
             _calisanServisKontrolcusu = Substitute.For<ICalisanServisKontrolcusu>();
-            _safetyLogger = Substitute.For<ILogger>();
-            _dataSyncServis = Substitute.For<IDataSyncService>();
-            _programGenelServis = new ProgramGenelServis(_calisanServisKontrolcusu, _safetyLogger, BeklemeSuresi, _dataSyncServis);
+            //_safetyLogger = Substitute.For<ILogger>();
+            IDataSyncYonetici dataSyncYonetici = Substitute.For<IDataSyncYonetici>();
+            _dataSyncServis = dataSyncYonetici.DataSyncServis;
+            _safetyLogger = dataSyncYonetici.SafetyLogger;
+            //_programGenelServis = new ProgramGenelServis(_calisanServisKontrolcusu, _safetyLogger, BeklemeSuresi, _dataSyncServis);
+            _programGenelServis = new ProgramGenelServis(_calisanServisKontrolcusu, BeklemeSuresi, dataSyncYonetici);
         }
 
         /*
@@ -78,15 +81,16 @@ namespace AdaDataSync.Test
         {
             ICalisanServisKontrolcusu csk = Substitute.For<ICalisanServisKontrolcusu>();
             csk.BuMakinadaBaskaServisCalisiyorMu().Returns(false);
-            ILogger snl = Substitute.For<ILogger>();
-            IDataSyncService syncServis1 = Substitute.For<IDataSyncService>();
-            IDataSyncService syncServis2 = Substitute.For<IDataSyncService>();
+            //ILogger snl = Substitute.For<ILogger>();
+            IDataSyncYonetici syncYonetici1 = Substitute.For<IDataSyncYonetici>();
+            IDataSyncYonetici syncYonetici2 = Substitute.For<IDataSyncYonetici>();
 
-            ProgramGenelServis pgs = new ProgramGenelServis(csk,snl, syncServis1, syncServis2);
+            //ProgramGenelServis pgs = new ProgramGenelServis(csk, snl, syncServis1, syncServis2);
+            ProgramGenelServis pgs = new ProgramGenelServis(csk, syncYonetici1, syncYonetici2);
             pgs.Calistir(1);
 
-            syncServis1.Received().Sync();
-            syncServis2.Received().Sync();
+            syncYonetici1.DataSyncServis.Received().Sync();
+            syncYonetici2.DataSyncServis.Received().Sync();
         }
 
         [Test]

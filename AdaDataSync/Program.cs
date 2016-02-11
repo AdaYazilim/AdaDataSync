@@ -11,7 +11,8 @@ namespace AdaDataSync
     {
         private static void Main()
         {
-            List<IDataSyncService> syncServisler = new List<IDataSyncService>();
+            //List<IDataSyncService> syncServisler = new List<IDataSyncService>();
+            List<IDataSyncYonetici> syncYoneticiler = new List<IDataSyncYonetici>();
 
             const string kaynakConfigString = "KaynakBaglantiString";
             const string hedefConfigString = "HedefBaglantiString";
@@ -46,12 +47,16 @@ namespace AdaDataSync
                 IVeritabaniIslemYapan hedefVeritabaniGuncelleyen = new HedefVeritabaniGuncelleyen(foxproConnection, sqlConnection);
 
                 IDataSyncService syncServis = new DataSyncService(guncellemeKontrol, hedefVeritabaniGuncelleyen, veriAktaran);
-                syncServisler.Add(syncServis);
+                ILogger safetyNetLogger = new TextDosyasiLogger(string.Format("hata_{0}.txt", i));
+                IDataSyncYonetici dataSyncYonetici = new DataSyncYonetici(syncServis, safetyNetLogger);
+
+                syncYoneticiler.Add(dataSyncYonetici);
             }
 
             ICalisanServisKontrolcusu calisanServisKontrolcusu = new CalisanServisKontrolcusu();
-            ILogger safetyNetLogger = new TextDosyasiLogger("hata.txt");
-            ProgramGenelServis genelServis = new ProgramGenelServis(calisanServisKontrolcusu, safetyNetLogger, syncServisler.ToArray());
+            //ILogger safetyNetLogger = new TextDosyasiLogger("hata.txt");
+            //ProgramGenelServis genelServis = new ProgramGenelServis(calisanServisKontrolcusu, safetyNetLogger, syncServisler.ToArray());
+            ProgramGenelServis genelServis = new ProgramGenelServis(calisanServisKontrolcusu, syncYoneticiler.ToArray());
             genelServis.Calistir();
         }
     }

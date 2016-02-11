@@ -6,22 +6,25 @@ namespace AdaDataSync.API
     internal class ProgramGenelServis
     {
         private readonly ICalisanServisKontrolcusu _calisanServisKontrolcusu;
-        private readonly ILogger _safetyLogger;
+        //private readonly ILogger _safetyLogger;
         private readonly int _beklemeSuresi;
-        private readonly IDataSyncService[] _syncServices;
+        private readonly IDataSyncYonetici[] _syncYoneticiler;
 
-        public ProgramGenelServis(ICalisanServisKontrolcusu calisanServisKontrolcusu, ILogger safetyLogger, params IDataSyncService[] syncServices)
-            :this(calisanServisKontrolcusu, safetyLogger, 5000, syncServices)
+        //public ProgramGenelServis(ICalisanServisKontrolcusu calisanServisKontrolcusu, ILogger safetyLogger, params IDataSyncService[] syncServices)
+        //    :this(calisanServisKontrolcusu, safetyLogger, 5000, syncServices)
+        public ProgramGenelServis(ICalisanServisKontrolcusu calisanServisKontrolcusu, params IDataSyncYonetici[] syncYoneticiler)
+            : this(calisanServisKontrolcusu, 5000, syncYoneticiler)
         {
 
         }
 
-        public ProgramGenelServis(ICalisanServisKontrolcusu calisanServisKontrolcusu, ILogger safetyLogger, int beklemeSuresi, params IDataSyncService[] syncServices)
+        //public ProgramGenelServis(ICalisanServisKontrolcusu calisanServisKontrolcusu, ILogger safetyLogger, int beklemeSuresi, params IDataSyncService[] syncServices)
+        public ProgramGenelServis(ICalisanServisKontrolcusu calisanServisKontrolcusu, int beklemeSuresi, params IDataSyncYonetici[] syncYoneticiler)
         {
             _calisanServisKontrolcusu = calisanServisKontrolcusu;
-            _safetyLogger = safetyLogger;
+            //_safetyLogger = safetyLogger;
             _beklemeSuresi = beklemeSuresi;
-            _syncServices = syncServices;
+            _syncYoneticiler = syncYoneticiler;
         }
 
         public void Calistir(int calistirmaSayisi = 0)
@@ -55,21 +58,23 @@ namespace AdaDataSync.API
 
         private void butunServisleriCalistir()
         {
-            foreach (IDataSyncService dataSyncService in _syncServices)
+            foreach (IDataSyncYonetici dataSyncYonetici in _syncYoneticiler)
             {
-                tekServisCalistir(dataSyncService);
+                tekServisCalistir(dataSyncYonetici);
             }
         }
 
-        private void tekServisCalistir(IDataSyncService dataSyncService)
+        private void tekServisCalistir(IDataSyncYonetici dataSyncYonetici)
         {
             try
             {
-                dataSyncService.Sync();
+                dataSyncYonetici.DataSyncServis.Sync();
             }
             catch (Exception ex)
             {
-                _safetyLogger.Logla(ex.Message);
+                //_safetyLogger.Logla(ex.Message);
+                //dataSyncService.SafetyLogla(ex.Message);
+                dataSyncYonetici.SafetyLogger.Logla(ex.Message);
             }
         }
     }

@@ -63,6 +63,8 @@
     <Compile Include="API\CalisanServisKontrolcusu.cs" />
     <Compile Include="API\VeriAktaran.cs" />
     <Compile Include="API\HedefVeritabaniGuncelleyen.cs" />
+    <Compile Include="DataSyncYonetici.cs" />
+    <Compile Include="IDataSyncYonetici.cs" />
     <Compile Include="Test\DatabaseProxyTest.cs" />
     <Compile Include="Test\VeriAktaranTest.cs" />
     <Compile Include="API\DataTransactionInfo.cs" />
