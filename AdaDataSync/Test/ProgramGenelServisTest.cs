@@ -18,11 +18,7 @@ namespace AdaDataSync.Test
         public void TestSetup()
         {
             _calisanServisKontrolcusu = Substitute.For<ICalisanServisKontrolcusu>();
-            //_safetyLogger = Substitute.For<ILogger>();
             _dataSyncYonetici = Substitute.For<IDataSyncYonetici>();
-            //_dataSyncYonetici = dataSyncYonetici.DataSyncServis;
-            //_safetyLogger = dataSyncYonetici.SafetyLogger;
-            //_programGenelServis = new ProgramGenelServis(_calisanServisKontrolcusu, _safetyLogger, BeklemeSuresi, _dataSyncServis);
             _programGenelServis = new ProgramGenelServis(_calisanServisKontrolcusu, BeklemeSuresi, _dataSyncYonetici);
         }
 
@@ -41,14 +37,6 @@ namespace AdaDataSync.Test
             _dataSyncYonetici.DidNotReceiveWithAnyArgs().Sync();
         }
 
-        //[Test]
-        //public void calisan_baska_bir_servis_yoksa_global_lock_koyar()
-        //{
-        //    _calisanServisKontrolcusu.BuMakinadaBaskaServisCalisiyorMu().Returns(false);
-        //    _programGenelServis.Calistir(1);
-        //    _calisanServisKontrolcusu.Received().MakinaBazindaKilitKoy();
-        //}
-
         [Test]
         public void calisan_baska_bir_servis_yoksa_sync_cagirilir()
         {
@@ -65,27 +53,14 @@ namespace AdaDataSync.Test
             _dataSyncYonetici.DidNotReceive().Sync();
         }
 
-        // DataSyncYoneticiTest classına alındı.
-        //[Test]
-        //public void sync_esnasinda_herhangi_bir_unhandled_exception_alinirsa_program_patlamamali_ve_ikincil_loga_kayit_atilmali()
-        //{
-        //    Exception ex = new Exception();
-        //    _dataSyncYonetici.When(ds => ds.Sync()).Do(x => { throw ex; });
-
-        //    Assert.DoesNotThrow(() => _programGenelServis.Calistir(1));
-        //    _safetyLogger.Received().Logla(ex.Message);
-        //}
-
         [Test]
         public void birden_fazla_datasyncYonetici_oldugunda_hepsinin_sync_metodu_calisir()
         {
             ICalisanServisKontrolcusu csk = Substitute.For<ICalisanServisKontrolcusu>();
             csk.BuMakinadaBaskaServisCalisiyorMu().Returns(false);
-            //ILogger snl = Substitute.For<ILogger>();
             IDataSyncYonetici syncYonetici1 = Substitute.For<IDataSyncYonetici>();
             IDataSyncYonetici syncYonetici2 = Substitute.For<IDataSyncYonetici>();
 
-            //ProgramGenelServis pgs = new ProgramGenelServis(csk, snl, syncServis1, syncServis2);
             ProgramGenelServis pgs = new ProgramGenelServis(csk, syncYonetici1, syncYonetici2);
             pgs.Calistir(1);
 

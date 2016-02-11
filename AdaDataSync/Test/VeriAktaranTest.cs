@@ -149,13 +149,6 @@ namespace AdaDataSync.Test
             Assert.Throws<Exception>(() => _service.VeritabaniIslemiYap());
         }
 
-        //[Test]
-        //public void cari_program_guncellemeye_basladiysa_dbProxynin_bekleyen_islemleri_alinmaz()
-        //{
-        //    _dbProxy.FoxproTarafindaGuncellemeYapiliyor().Returns(true);
-        //    _dbProxy.DidNotReceiveWithAnyArgs().BekleyenTransactionlariAl(10000);
-        //}
-
 		private static List<DataTransactionInfo> ornekTransactionLogKayitlariYarat(int adet)
 		{
 			List<DataTransactionInfo> kayitlar = new List<DataTransactionInfo>();
