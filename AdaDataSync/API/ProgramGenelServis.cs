@@ -29,7 +29,7 @@ namespace AdaDataSync.API
             if (_calisanServisKontrolcusu.BuMakinadaBaskaServisCalisiyorMu())
                 return;
 
-            _calisanServisKontrolcusu.MakinaBazindaKilitKoy();
+            //_calisanServisKontrolcusu.MakinaBazindaKilitKoy();
 
             int calistirmaNo = 0;
             while (true)

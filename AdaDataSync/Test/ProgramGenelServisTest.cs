@@ -39,13 +39,13 @@ namespace AdaDataSync.Test
             _dataSyncServis.DidNotReceiveWithAnyArgs().Sync();
         }
 
-        [Test]
-        public void calisan_baska_bir_servis_yoksa_global_lock_koyar()
-        {
-            _calisanServisKontrolcusu.BuMakinadaBaskaServisCalisiyorMu().Returns(false);
-            _programGenelServis.Calistir(1);
-            _calisanServisKontrolcusu.Received().MakinaBazindaKilitKoy();
-        }
+        //[Test]
+        //public void calisan_baska_bir_servis_yoksa_global_lock_koyar()
+        //{
+        //    _calisanServisKontrolcusu.BuMakinadaBaskaServisCalisiyorMu().Returns(false);
+        //    _programGenelServis.Calistir(1);
+        //    _calisanServisKontrolcusu.Received().MakinaBazindaKilitKoy();
+        //}
 
         [Test]
         public void calisan_baska_bir_servis_yoksa_sync_cagirilir()
@@ -53,6 +53,14 @@ namespace AdaDataSync.Test
             _calisanServisKontrolcusu.BuMakinadaBaskaServisCalisiyorMu().Returns(false);
             _programGenelServis.Calistir(1);
             _dataSyncServis.Received().Sync();
+        }
+
+        [Test]
+        public void calisan_baska_bir_servis_varsa_sync_cagirilmaz()
+        {
+            _calisanServisKontrolcusu.BuMakinadaBaskaServisCalisiyorMu().Returns(true);
+            _programGenelServis.Calistir(1);
+            _dataSyncServis.DidNotReceive().Sync();
         }
 
         [Test]
