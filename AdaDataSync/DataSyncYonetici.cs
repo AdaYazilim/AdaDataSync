@@ -1,4 +1,5 @@
-﻿using AdaDataSync.API;
+﻿using System;
+using AdaDataSync.API;
 
 namespace AdaDataSync
 {
@@ -7,20 +8,22 @@ namespace AdaDataSync
         private readonly IDataSyncService _dataSyncServis;
         private readonly ILogger _safetyLogger;
 
-        public IDataSyncService DataSyncServis
-        {
-            get { return _dataSyncServis; }
-        }
-
-        public ILogger SafetyLogger
-        {
-            get { return _safetyLogger; }
-        }
-
         public DataSyncYonetici(IDataSyncService dataSyncServis, ILogger safetyLogger)
         {
             _dataSyncServis = dataSyncServis;
             _safetyLogger = safetyLogger;
+        }
+
+        public void Sync()
+        {
+            try
+            {
+                _dataSyncServis.Sync();
+            }
+            catch (Exception ex)
+            {
+                _safetyLogger.Logla(ex.Message);
+            }
         }
     }
 }

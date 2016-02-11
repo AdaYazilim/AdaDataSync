@@ -1,28 +1,22 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 
 namespace AdaDataSync.API
 {
     internal class ProgramGenelServis
     {
         private readonly ICalisanServisKontrolcusu _calisanServisKontrolcusu;
-        //private readonly ILogger _safetyLogger;
         private readonly int _beklemeSuresi;
         private readonly IDataSyncYonetici[] _syncYoneticiler;
 
-        //public ProgramGenelServis(ICalisanServisKontrolcusu calisanServisKontrolcusu, ILogger safetyLogger, params IDataSyncService[] syncServices)
-        //    :this(calisanServisKontrolcusu, safetyLogger, 5000, syncServices)
         public ProgramGenelServis(ICalisanServisKontrolcusu calisanServisKontrolcusu, params IDataSyncYonetici[] syncYoneticiler)
             : this(calisanServisKontrolcusu, 5000, syncYoneticiler)
         {
 
         }
 
-        //public ProgramGenelServis(ICalisanServisKontrolcusu calisanServisKontrolcusu, ILogger safetyLogger, int beklemeSuresi, params IDataSyncService[] syncServices)
         public ProgramGenelServis(ICalisanServisKontrolcusu calisanServisKontrolcusu, int beklemeSuresi, params IDataSyncYonetici[] syncYoneticiler)
         {
             _calisanServisKontrolcusu = calisanServisKontrolcusu;
-            //_safetyLogger = safetyLogger;
             _beklemeSuresi = beklemeSuresi;
             _syncYoneticiler = syncYoneticiler;
         }
@@ -31,8 +25,6 @@ namespace AdaDataSync.API
         {
             if (_calisanServisKontrolcusu.BuMakinadaBaskaServisCalisiyorMu())
                 return;
-
-            //_calisanServisKontrolcusu.MakinaBazindaKilitKoy();
 
             int calistirmaNo = 0;
             while (true)
@@ -66,16 +58,7 @@ namespace AdaDataSync.API
 
         private void tekServisCalistir(IDataSyncYonetici dataSyncYonetici)
         {
-            try
-            {
-                dataSyncYonetici.DataSyncServis.Sync();
-            }
-            catch (Exception ex)
-            {
-                //_safetyLogger.Logla(ex.Message);
-                //dataSyncService.SafetyLogla(ex.Message);
-                dataSyncYonetici.SafetyLogger.Logla(ex.Message);
-            }
+            dataSyncYonetici.Sync();
         }
     }
 }

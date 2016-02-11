@@ -1,10 +1,7 @@
-﻿using AdaDataSync.API;
-
-namespace AdaDataSync
+﻿namespace AdaDataSync
 {
     public interface IDataSyncYonetici
     {
-        IDataSyncService DataSyncServis{get;}
-        ILogger SafetyLogger { get; }
+        void Sync();
     }
 }

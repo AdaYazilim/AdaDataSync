@@ -66,6 +66,9 @@
     <Compile Include="DataSyncYonetici.cs" />
     <Compile Include="IDataSyncYonetici.cs" />
     <Compile Include="Test\DatabaseProxyTest.cs" />
+    <Compile Include="Test\DataSyncYoneticiTest.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Test\VeriAktaranTest.cs" />
     <Compile Include="API\DataTransactionInfo.cs" />
     <Compile Include="API\ICalisanServisKontrolcusu.cs" />

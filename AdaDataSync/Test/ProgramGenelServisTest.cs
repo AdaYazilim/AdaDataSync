@@ -10,8 +10,7 @@ namespace AdaDataSync.Test
     class ProgramGenelServisTest
     {
         private ICalisanServisKontrolcusu _calisanServisKontrolcusu;
-        private IDataSyncService _dataSyncServis;
-        private ILogger _safetyLogger;
+        private IDataSyncYonetici _dataSyncYonetici;
         private ProgramGenelServis _programGenelServis;
         private const int BeklemeSuresi = 100;
 
@@ -20,11 +19,11 @@ namespace AdaDataSync.Test
         {
             _calisanServisKontrolcusu = Substitute.For<ICalisanServisKontrolcusu>();
             //_safetyLogger = Substitute.For<ILogger>();
-            IDataSyncYonetici dataSyncYonetici = Substitute.For<IDataSyncYonetici>();
-            _dataSyncServis = dataSyncYonetici.DataSyncServis;
-            _safetyLogger = dataSyncYonetici.SafetyLogger;
+            _dataSyncYonetici = Substitute.For<IDataSyncYonetici>();
+            //_dataSyncYonetici = dataSyncYonetici.DataSyncServis;
+            //_safetyLogger = dataSyncYonetici.SafetyLogger;
             //_programGenelServis = new ProgramGenelServis(_calisanServisKontrolcusu, _safetyLogger, BeklemeSuresi, _dataSyncServis);
-            _programGenelServis = new ProgramGenelServis(_calisanServisKontrolcusu, BeklemeSuresi, dataSyncYonetici);
+            _programGenelServis = new ProgramGenelServis(_calisanServisKontrolcusu, BeklemeSuresi, _dataSyncYonetici);
         }
 
         /*
@@ -39,7 +38,7 @@ namespace AdaDataSync.Test
         {
             _calisanServisKontrolcusu.BuMakinadaBaskaServisCalisiyorMu().Returns(true);
             _programGenelServis.Calistir();
-            _dataSyncServis.DidNotReceiveWithAnyArgs().Sync();
+            _dataSyncYonetici.DidNotReceiveWithAnyArgs().Sync();
         }
 
         //[Test]
@@ -55,7 +54,7 @@ namespace AdaDataSync.Test
         {
             _calisanServisKontrolcusu.BuMakinadaBaskaServisCalisiyorMu().Returns(false);
             _programGenelServis.Calistir(1);
-            _dataSyncServis.Received().Sync();
+            _dataSyncYonetici.Received().Sync();
         }
 
         [Test]
@@ -63,21 +62,22 @@ namespace AdaDataSync.Test
         {
             _calisanServisKontrolcusu.BuMakinadaBaskaServisCalisiyorMu().Returns(true);
             _programGenelServis.Calistir(1);
-            _dataSyncServis.DidNotReceive().Sync();
+            _dataSyncYonetici.DidNotReceive().Sync();
         }
 
-        [Test]
-        public void sync_esnasinda_herhangi_bir_unhandled_exception_alinirsa_program_patlamamali_ve_ikincil_loga_kayit_atilmali()
-        {
-            Exception ex = new Exception();
-            _dataSyncServis.When(ds => ds.Sync()).Do(x => { throw ex; });
+        // DataSyncYoneticiTest classına alındı.
+        //[Test]
+        //public void sync_esnasinda_herhangi_bir_unhandled_exception_alinirsa_program_patlamamali_ve_ikincil_loga_kayit_atilmali()
+        //{
+        //    Exception ex = new Exception();
+        //    _dataSyncYonetici.When(ds => ds.Sync()).Do(x => { throw ex; });
 
-            Assert.DoesNotThrow(() => _programGenelServis.Calistir(1));
-            _safetyLogger.Received().Logla(ex.Message);
-        }
+        //    Assert.DoesNotThrow(() => _programGenelServis.Calistir(1));
+        //    _safetyLogger.Received().Logla(ex.Message);
+        //}
 
         [Test]
-        public void birden_fazla_datasyncServis_oldugunda_hepsinin_sync_metodu_calisir()
+        public void birden_fazla_datasyncYonetici_oldugunda_hepsinin_sync_metodu_calisir()
         {
             ICalisanServisKontrolcusu csk = Substitute.For<ICalisanServisKontrolcusu>();
             csk.BuMakinadaBaskaServisCalisiyorMu().Returns(false);
@@ -89,8 +89,8 @@ namespace AdaDataSync.Test
             ProgramGenelServis pgs = new ProgramGenelServis(csk, syncYonetici1, syncYonetici2);
             pgs.Calistir(1);
 
-            syncYonetici1.DataSyncServis.Received().Sync();
-            syncYonetici2.DataSyncServis.Received().Sync();
+            syncYonetici1.Received().Sync();
+            syncYonetici2.Received().Sync();
         }
 
         [Test]
@@ -104,7 +104,7 @@ namespace AdaDataSync.Test
             
             Thread.Sleep(sleepSuresi);
             int receiveSayisi = (int) Math.Floor(katsayi) + 1;
-            _dataSyncServis.Received(receiveSayisi).Sync();
+            _dataSyncYonetici.Received(receiveSayisi).Sync();
         }
 
         /// <summary>
@@ -114,7 +114,7 @@ namespace AdaDataSync.Test
         [Test]
         public void beklemeSuresi_1_saniye_iken_sync_islemi_de_1_saniye_suruyorsa_sync_bittigi_gibi_yenisi_baslamali()
         {
-            _dataSyncServis.When(ds => ds.Sync()).Do(x => Thread.Sleep(BeklemeSuresi));
+            _dataSyncYonetici.When(ds => ds.Sync()).Do(x => Thread.Sleep(BeklemeSuresi));
             calistirma_metoduna_parametre_gonderilmezse_sync_metodu_belirli_zaman_araliklariyla_tekrar_tekrar_calismali();
         }
 

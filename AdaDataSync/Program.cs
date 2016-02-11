@@ -11,7 +11,6 @@ namespace AdaDataSync
     {
         private static void Main()
         {
-            //List<IDataSyncService> syncServisler = new List<IDataSyncService>();
             List<IDataSyncYonetici> syncYoneticiler = new List<IDataSyncYonetici>();
 
             const string kaynakConfigString = "KaynakBaglantiString";
@@ -54,8 +53,6 @@ namespace AdaDataSync
             }
 
             ICalisanServisKontrolcusu calisanServisKontrolcusu = new CalisanServisKontrolcusu();
-            //ILogger safetyNetLogger = new TextDosyasiLogger("hata.txt");
-            //ProgramGenelServis genelServis = new ProgramGenelServis(calisanServisKontrolcusu, safetyNetLogger, syncServisler.ToArray());
             ProgramGenelServis genelServis = new ProgramGenelServis(calisanServisKontrolcusu, syncYoneticiler.ToArray());
             genelServis.Calistir();
         }
