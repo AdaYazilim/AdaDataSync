@@ -40,9 +40,12 @@ namespace AdaDataSync
                 kaynakBaglanti = kaynakBaglanti.Trim();
                 hedefBaglanti = hedefBaglanti.Trim();
 
-                IDataSyncService syncServis = syncServisAl(kaynakBaglanti, hedefBaglanti, i);
+                int logDosyaNo = i;
+
+                IDataSyncService syncServis = syncServisAl(kaynakBaglanti, hedefBaglanti, logDosyaNo);
                 ILogger safetyNetLogger = new TextDosyasiLogger(string.Format("hata_{0}.txt", i));
-                IDataSyncYonetici dataSyncYonetici = new DataSyncYonetici(syncServis, safetyNetLogger);
+                DataSyncYonetici dataSyncYonetici = new DataSyncYonetici(syncServis, safetyNetLogger);
+                dataSyncYonetici.KritikHataAtti += () => syncServisAl(kaynakBaglanti, hedefBaglanti, logDosyaNo);
 
                 yield return dataSyncYonetici;
             }

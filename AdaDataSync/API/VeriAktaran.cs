@@ -13,7 +13,7 @@ namespace AdaDataSync.API
             _dbProxy = dbProxy;
             _syncEdilecekMaxKayitSayisi = syncEdilecekMaxKayitSayisi;
         }
-		//
+
         public void VeritabaniIslemiYap()
         {
             try

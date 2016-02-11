@@ -5,8 +5,10 @@ namespace AdaDataSync
 {
     class DataSyncYonetici : IDataSyncYonetici
     {
-        private readonly IDataSyncService _dataSyncServis;
+        private IDataSyncService _dataSyncServis;
         private readonly ILogger _safetyLogger;
+
+        public event Func<IDataSyncService> KritikHataAtti;
 
         public DataSyncYonetici(IDataSyncService dataSyncServis, ILogger safetyLogger)
         {
@@ -22,6 +24,9 @@ namespace AdaDataSync
             }
             catch (Exception ex)
             {
+                if (KritikHataAtti != null)
+                    _dataSyncServis = KritikHataAtti();
+
                 _safetyLogger.Logla(ex.Message);
             }
         }
