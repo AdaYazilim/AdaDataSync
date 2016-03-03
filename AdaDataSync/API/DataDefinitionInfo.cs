@@ -9,8 +9,8 @@
         public DataDefinitionInfo(int fprkDdLog, string tabloAdi, string degisenAlanAdi)
         {
             FprkDdLog = fprkDdLog;
-            TabloAdi = tabloAdi;
-            DegisenAlanAdi = degisenAlanAdi;
+            TabloAdi = tabloAdi.Trim().ToLowerInvariant();
+            DegisenAlanAdi = degisenAlanAdi.Trim().ToLowerInvariant();
         }
     }
 }

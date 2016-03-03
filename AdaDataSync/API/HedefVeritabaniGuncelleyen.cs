@@ -38,8 +38,8 @@ namespace AdaDataSync.API
                     .Select(dr =>
                         new DataDefinitionInfo(
                             (int) dr["fprkddlog"],
-                            dr["dosyaadi"].ToString().ToLowerInvariant().Trim(),
-                            dr["alanAdi"].ToString().ToLowerInvariant().Trim()))
+                            dr["dosyaadi"].ToString(),
+                            dr["alanAdi"].ToString()))
                     .GroupBy(ddi => ddi.TabloAdi);
 
 
@@ -72,38 +72,61 @@ namespace AdaDataSync.API
 
         private void tablonunIslemleriniYap(string tabloAdi, IEnumerable<DataDefinitionInfo> ddiler, DataRow[] kaynakTabloKolonlari)
         {
-            string[] hedefKolonlar = null;
+            // trlog'un ddi'sinin sql'e aktarılmasına gerek yok. Çünkü yine bu program sql'deki trlog'a işini bitirdiklerini log atıyor. 
+            // sql'deki trlog'da burası sebepli otomatik bir structure değişikliği olursa oraya kayıt atan class otomatik değişmeyeceği için 
+            // hata oluşur. Foxpro'daki trlog değişirse elle müdahale gerekecek.
+            // w_exists_tbl ise structure olarak aktarılmalı.
+            if (tabloAdi == "ddlog" || tabloAdi == "trlog")
+            {
+                // güncellemeye gerek yok. ddlog kayıtlarını sil.
+                ddlogKayitlariniSil(ddiler);
+                return;
+            }
+
+            if (!hedefteTabloVarMi(tabloAdi))
+            {
+                tabloyuTumuyleYenidenYarat(tabloAdi, kaynakTabloKolonlari);
+                ddlogKayitlariniSil(ddiler);
+                return;
+            }
+
             foreach (DataDefinitionInfo ddi in ddiler)
             {
-                // trlog'un ddi'sinin sql'e aktarılmasına gerek yok. Çünkü yine bu program sql'deki trlog'a işini bitirdiklerini log atıyor. 
-                // sql'deki trlog'da burası sebepli otomatik bir structure değişikliği olursa oraya kayıt atan class otomatik değişmeyeceği için 
-                // hata oluşur. Foxpro'daki trlog değişirse elle müdahale gerekecek.
-                // w_exists_tbl ise structure olarak aktarılmalı.
-                if (ddi.TabloAdi.ToLowerInvariant() != "ddlog" && ddi.TabloAdi.ToLowerInvariant() != "trlog")
-                {
-                    if (string.IsNullOrWhiteSpace(ddi.DegisenAlanAdi))
-                    {
-                        tabloyuTumuyleGuncelle(tabloAdi, kaynakTabloKolonlari);
-                    }
-                    else
-                    {
-                        if (hedefKolonlar==null)
-                        {
-                            SqlCommand command = _sqlConnection.CreateCommand();
-                            command.CommandText = "select * from " + tabloAdi + " where 1=2";
-                            DataTable dtHedefKolonlar = new DataTable();
-                            new SqlDataAdapter(command).Fill(dtHedefKolonlar);
-                            hedefKolonlar = dtHedefKolonlar.Columns.Cast<DataColumn>().Select(dc => dc.ColumnName.ToLowerInvariant()).ToArray();
-                        }
-                        tabloAlaniniGuncelle(ddi, kaynakTabloKolonlari, hedefKolonlar);
-                    }
-                }
-
+                tabloGuncellemesiniYap(tabloAdi, kaynakTabloKolonlari, ddi);
                 ddlogKaydiniSil(ddi);
             }
         }
 
-        private void tabloyuTumuyleGuncelle(string tabloAdi, DataRow[] tabloKolonlari)
+        private bool hedefteTabloVarMi(string tabloAdi)
+        {
+            SqlCommand command = _sqlConnection.CreateCommand();
+            command.CommandText = "select * from " + tabloAdi + " where 1=2";
+            DataTable dt = new DataTable();
+            try
+            {
+                new SqlDataAdapter(command).Fill(dt);
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        private void tabloGuncellemesiniYap(string tabloAdi, DataRow[] kaynakTabloKolonlari, DataDefinitionInfo ddi)
+        {
+            if (string.IsNullOrWhiteSpace(ddi.DegisenAlanAdi))
+                return;
+
+            SqlCommand command = _sqlConnection.CreateCommand();
+            command.CommandText = "select * from " + tabloAdi + " where 1=2";
+            DataTable dtHedefKolonlar = new DataTable();
+            new SqlDataAdapter(command).Fill(dtHedefKolonlar);
+            string[] hedefKolonlar = dtHedefKolonlar.Columns.Cast<DataColumn>().Select(dc => dc.ColumnName.ToLowerInvariant()).ToArray();
+            tabloAlaniniGuncelle(ddi, kaynakTabloKolonlari, hedefKolonlar);
+        }
+
+        private void tabloyuTumuyleYenidenYarat(string tabloAdi, DataRow[] tabloKolonlari)
         {
             string kolonlarKomutString = "";
             bool primaryKeyEklendi = false;
@@ -143,6 +166,14 @@ namespace AdaDataSync.API
             SqlCommand command = _sqlConnection.CreateCommand();
             command.CommandText = komut;
             command.ExecuteNonQuery();
+        }
+
+        private void ddlogKayitlariniSil(IEnumerable<DataDefinitionInfo> ddiler)
+        {
+            foreach (DataDefinitionInfo ddi in ddiler)
+            {
+                ddlogKaydiniSil(ddi);
+            }
         }
 
         private void ddlogKaydiniSil(DataDefinitionInfo ddi)
