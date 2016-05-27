@@ -42,17 +42,26 @@ namespace AdaDataSync.API
 
 	    public void BaglantilariKapat()
         {
-            if (!_kaynakBaglantiAcik)
-                throw new Exception("Kaynak bağlantı kapalı iken tekrar kapatılamaz.");
+            // "Hedef bağlantı kapalı iken tekrar kapatılamaz." hatasını çok görüyorduk. Aslında belki de sql erişimi olmadığı için o hatayı
+            // atıyor olabileceğini gördüm. Açıklayıcı olmuyor. Burada hata attırmıyorum.
 
-            if (!_hedefBaglantiAcik)
-                throw new Exception("Hedef bağlantı kapalı iken tekrar kapatılamaz.");
+            //if (!_kaynakBaglantiAcik)
+            //    throw new Exception("Kaynak bağlantı kapalı iken tekrar kapatılamaz.");
 
-            _kaynakVeriIslemleri.BaglantiKapat();
-            _kaynakBaglantiAcik = false;
+            //if (!_hedefBaglantiAcik)
+            //    throw new Exception("Hedef bağlantı kapalı iken tekrar kapatılamaz.");
 
-            _hedefVeriIslemleri.BaglantiKapat();
-            _hedefBaglantiAcik = false;
+	        if (_kaynakBaglantiAcik)
+	        {
+	            _kaynakVeriIslemleri.BaglantiKapat();
+	            _kaynakBaglantiAcik = false;
+	        }
+
+	        if (_hedefBaglantiAcik)
+	        {
+	            _hedefVeriIslemleri.BaglantiKapat();
+	            _hedefBaglantiAcik = false;
+	        }
         }
 
 	    public List<DataTransactionInfo> BekleyenTransactionlariAl(int kayitSayisi)
