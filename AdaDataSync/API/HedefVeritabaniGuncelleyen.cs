@@ -150,6 +150,11 @@ namespace AdaDataSync.API
             string komut;
             if (ilgiliKolonBilgisi == null) // Kolon kaynak tabloda yok. Yani silinmiş.
             {
+                if (!hedefKolonlar.Contains(ddi.DegisenAlanAdi.ToLowerInvariant())) // kolon zaten yoksa birşey yapma
+                {
+                    return;
+                }
+
                 komut = "alter table " + ddi.TabloAdi + " drop column " + ddi.DegisenAlanAdi;
             }
             else
