@@ -49,6 +49,7 @@ namespace AdaDataSync
 
                 yield return dataSyncYonetici;
             }
+
         }
 
         private static IDataSyncService syncServisAl(string kaynakBaglanti, string hedefBaglanti, int logDosyaNo)
