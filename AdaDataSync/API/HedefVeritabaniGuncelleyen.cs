@@ -169,6 +169,7 @@ namespace AdaDataSync.API
             }
 
             SqlCommand command = _sqlConnection.CreateCommand();
+            command.CommandTimeout = 180;
             command.CommandText = komut;
             command.ExecuteNonQuery();
         }
