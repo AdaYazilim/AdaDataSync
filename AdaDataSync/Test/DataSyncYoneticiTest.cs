@@ -8,6 +8,7 @@ namespace AdaDataSync.Test
     [TestFixture]
     public class DataSyncYoneticiTest
     {
+        private IGuncellemeKontrol _guncellemeKontrol;
         private IDataSyncService _dataSyncServis;
         private ILogger _safetyLogger;
         private DataSyncYonetici _dataSyncYonetici;
@@ -15,10 +16,11 @@ namespace AdaDataSync.Test
         [SetUp]
         public void TestSetup()
         {
+            _guncellemeKontrol = Substitute.For<IGuncellemeKontrol>();
             _dataSyncServis = Substitute.For<IDataSyncService>();
             _safetyLogger = Substitute.For<ILogger>();
 
-            _dataSyncYonetici = new DataSyncYonetici(_dataSyncServis, _safetyLogger);
+            _dataSyncYonetici = new DataSyncYonetici(_guncellemeKontrol, _dataSyncServis, _safetyLogger);
         }
 
         [Test]

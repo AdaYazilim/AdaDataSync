@@ -42,9 +42,10 @@ namespace AdaDataSync
 
                 int logDosyaNo = i;
 
+                IGuncellemeKontrol guncellemeKontrol = new FoxproGuncellemeKontrol(kaynakBaglanti);
                 IDataSyncService syncServis = syncServisAl(kaynakBaglanti, hedefBaglanti, logDosyaNo);
                 ILogger safetyNetLogger = new TextDosyasiLogger(string.Format("hata_{0}.txt", i));
-                DataSyncYonetici dataSyncYonetici = new DataSyncYonetici(syncServis, safetyNetLogger);
+                DataSyncYonetici dataSyncYonetici = new DataSyncYonetici(guncellemeKontrol, syncServis, safetyNetLogger);
                 dataSyncYonetici.KritikHataAtti += () => syncServisAl(kaynakBaglanti, hedefBaglanti, logDosyaNo);
 
                 yield return dataSyncYonetici;
@@ -54,7 +55,6 @@ namespace AdaDataSync
 
         private static IDataSyncService syncServisAl(string kaynakBaglanti, string hedefBaglanti, int logDosyaNo)
         {
-            IGuncellemeKontrol guncellemeKontrol = new FoxproGuncellemeKontrol(kaynakBaglanti);
             OleDbConnection foxproConnection = new OleDbConnection(kaynakBaglanti);
             SqlConnection sqlConnection = new SqlConnection(hedefBaglanti);
             IVeritabaniIslemYapan hedefVeritabaniGuncelleyen = new HedefVeritabaniGuncelleyen(foxproConnection, sqlConnection);
@@ -63,7 +63,7 @@ namespace AdaDataSync
             ILogger logger = new TextDosyasiLogger("log_" + logDosyaNo + ".txt");
             IDatabaseProxy dp = new DatabaseProxy(tviKaynak, tviHedef, logger);
             IVeritabaniIslemYapan veriAktaran = new VeriAktaran(dp);
-            IDataSyncService retVal = new DataSyncService(guncellemeKontrol, hedefVeritabaniGuncelleyen, veriAktaran);
+            IDataSyncService retVal = new DataSyncService(hedefVeritabaniGuncelleyen, veriAktaran);
             return retVal;
         }
     }

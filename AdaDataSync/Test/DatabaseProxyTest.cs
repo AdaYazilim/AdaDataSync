@@ -83,10 +83,11 @@ namespace AdaDataSync.Test
             Assert.Throws<Exception>(() => _dbProxy.BaglantilariAc());
         }
 
-        [Test]
-        public void baglanti_kapali_iken_tekrar_kapatilmaya_calisilirsa_exception_atmali()
-        {
-            Assert.Throws<Exception>(() => _dbProxy.BaglantilariKapat());
-        }
+        // bundan vazgeçildi
+        //[Test]
+        //public void baglanti_kapali_iken_tekrar_kapatilmaya_calisilirsa_exception_atmali()
+        //{
+        //    Assert.Throws<Exception>(() => _dbProxy.BaglantilariKapat());
+        //}
     }
 }
