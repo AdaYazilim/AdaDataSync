@@ -43,22 +43,14 @@ namespace AdaDataSync
                 int logDosyaNo = i;
 
                 IGuncellemeKontrol guncellemeKontrol = new FoxproGuncellemeKontrol(kaynakBaglanti);
-                ITumDosyalariKullanmaMotoru dosyalariKullanmaMotoru = tumDosyalariKullanmaMotoruAl(kaynakBaglanti);
                 IDataSyncService syncServis = syncServisAl(kaynakBaglanti, hedefBaglanti, logDosyaNo);
                 ILogger safetyNetLogger = new TextDosyasiLogger(string.Format("hata_{0}.txt", i));
-                DataSyncYonetici dataSyncYonetici = new DataSyncYonetici(guncellemeKontrol, dosyalariKullanmaMotoru, syncServis, safetyNetLogger);
+                DataSyncYonetici dataSyncYonetici = new DataSyncYonetici(guncellemeKontrol, syncServis, safetyNetLogger);
                 dataSyncYonetici.KritikHataAtti += () => syncServisAl(kaynakBaglanti, hedefBaglanti, logDosyaNo);
 
                 yield return dataSyncYonetici;
             }
 
-        }
-
-        private static ITumDosyalariKullanmaMotoru tumDosyalariKullanmaMotoruAl(string kaynakBaglanti)
-        {
-            OleDbConnection foxproConnection = new OleDbConnection(kaynakBaglanti);
-            ITumDosyalariKullanmaMotoru dosyalariKullanmaMotoru = new TumDosyalariKullanmaMotoru(foxproConnection);
-            return dosyalariKullanmaMotoru;
         }
 
         private static IDataSyncService syncServisAl(string kaynakBaglanti, string hedefBaglanti, int logDosyaNo)

@@ -19,9 +19,8 @@ namespace AdaDataSync.Test
             _guncellemeKontrol = Substitute.For<IGuncellemeKontrol>();
             _dataSyncServis = Substitute.For<IDataSyncService>();
             _safetyLogger = Substitute.For<ILogger>();
-            ITumDosyalariKullanmaMotoru tumDosyalariKullanmaMotoru = Substitute.For<ITumDosyalariKullanmaMotoru>();
 
-            _dataSyncYonetici = new DataSyncYonetici(_guncellemeKontrol, tumDosyalariKullanmaMotoru, _dataSyncServis, _safetyLogger);
+            _dataSyncYonetici = new DataSyncYonetici(_guncellemeKontrol, _dataSyncServis, _safetyLogger);
         }
 
         [Test]
