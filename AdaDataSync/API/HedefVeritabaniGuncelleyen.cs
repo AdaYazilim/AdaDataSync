@@ -18,7 +18,7 @@ namespace AdaDataSync.API
             _foxproConnection = foxproConnection;
             _sqlConnection = sqlConnection;
         }
-		//
+		
         public void VeritabaniIslemiYap()
         {
             const string selectKomut = "select * from ddlog";
