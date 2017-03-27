@@ -21,7 +21,8 @@ namespace AdaDataSync.Test
 		public void TestSetup()
 		{
 			_dbProxy = Substitute.For<IDatabaseProxy>();
-            _service = new VeriAktaran(_dbProxy);
+		    IAktarimScope aktarimScope = new ButunTablolarAktarimScope();
+            _service = new VeriAktaran(_dbProxy, aktarimScope);
 		}
 
 		[Test]

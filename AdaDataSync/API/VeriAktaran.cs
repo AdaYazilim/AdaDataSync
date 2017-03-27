@@ -6,11 +6,13 @@ namespace AdaDataSync.API
     class VeriAktaran : IVeritabaniIslemYapan
     {
         private readonly IDatabaseProxy _dbProxy;
+        private readonly IAktarimScope _aktarimScope;
         private readonly int _syncEdilecekMaxKayitSayisi;
 
-        public VeriAktaran(IDatabaseProxy dbProxy, int syncEdilecekMaxKayitSayisi = 10000)
+        public VeriAktaran(IDatabaseProxy dbProxy, IAktarimScope aktarimScope, int syncEdilecekMaxKayitSayisi = 10000)
         {
             _dbProxy = dbProxy;
+            _aktarimScope = aktarimScope;
             _syncEdilecekMaxKayitSayisi = syncEdilecekMaxKayitSayisi;
         }
 
@@ -28,10 +30,14 @@ namespace AdaDataSync.API
                     try
                     {
                         // ddlog kayıtları senkronize edilmeyecek.
-                        if (logKaydi.TabloAdi != "ddlog" && logKaydi.TabloAdi != "w_exists_tbl")
+
+                        if (_aktarimScope.TabloAktarimaDahil(logKaydi.TabloAdi))
                         {
-                            tekLogKaydiniIsle(logKaydi);
-                            _dbProxy.LogKaydiniSqleAktar(logKaydi);
+                            if (logKaydi.TabloAdi != "ddlog" && logKaydi.TabloAdi != "w_exists_tbl")
+                            {
+                                tekLogKaydiniIsle(logKaydi);
+                                _dbProxy.LogKaydiniSqleAktar(logKaydi);
+                            }    
                         }
 
                         _dbProxy.LogKayitSil(logKaydi);

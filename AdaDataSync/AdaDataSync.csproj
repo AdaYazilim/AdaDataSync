@@ -55,6 +55,7 @@
     <Compile Include="API\DataDefinitionInfo.cs" />
     <Compile Include="API\DataSyncService.cs" />
     <Compile Include="API\GuncellemeKontrol.cs" />
+    <Compile Include="API\IAktarimScope.cs" />
     <Compile Include="API\IDataSyncService.cs" />
     <Compile Include="API\IGuncellemeKontrol.cs" />
     <Compile Include="API\IIslemYapan.cs" />

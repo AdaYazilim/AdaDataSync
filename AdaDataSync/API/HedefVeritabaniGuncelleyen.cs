@@ -12,11 +12,13 @@ namespace AdaDataSync.API
     {
         private readonly OleDbConnection _foxproConnection;
         private readonly SqlConnection _sqlConnection;
+        private readonly IAktarimScope _aktarimScope;
 
-        public HedefVeritabaniGuncelleyen(OleDbConnection foxproConnection, SqlConnection sqlConnection)
+        public HedefVeritabaniGuncelleyen(OleDbConnection foxproConnection, SqlConnection sqlConnection, IAktarimScope aktarimScope)
         {
             _foxproConnection = foxproConnection;
             _sqlConnection = sqlConnection;
+            _aktarimScope = aktarimScope;
         }
 		
         public void VeritabaniIslemiYap()
@@ -46,7 +48,6 @@ namespace AdaDataSync.API
                 foreach (IGrouping<string, DataDefinitionInfo> g in ddiler)
                 {
                     string tabloAdi = g.Key;
-
                     IEnumerable<DataDefinitionInfo> tabloDdiler = g;
                     DataRow[] tabloKolonlari = fpKolonlar.Select("table_name='" + tabloAdi + "'");
                     tablonunIslemleriniYap(tabloAdi, tabloDdiler, tabloKolonlari);
@@ -79,6 +80,12 @@ namespace AdaDataSync.API
             if (tabloAdi == "ddlog" || tabloAdi == "trlog")
             {
                 // güncellemeye gerek yok. ddlog kayıtlarını sil.
+                ddlogKayitlariniSil(ddiler);
+                return;
+            }
+
+            if (!_aktarimScope.TabloAktarimaDahil(tabloAdi))
+            {
                 ddlogKayitlariniSil(ddiler);
                 return;
             }
