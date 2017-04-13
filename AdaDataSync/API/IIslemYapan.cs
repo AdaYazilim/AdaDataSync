@@ -1,7 +1,13 @@
 ﻿namespace AdaDataSync.API
 {
-    public interface IVeritabaniIslemYapan
+    public interface IVeritabaniGuncelleyen
     {
-        void VeritabaniIslemiYap();
+        void Guncelle();
+    }
+
+    public interface IVeriAktaran
+    {
+        void AktarimYap();
     }
 }
+

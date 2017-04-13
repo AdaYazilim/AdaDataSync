@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace AdaDataSync.API
 {
-    class VeriAktaran : IVeritabaniIslemYapan
+    class VeriAktaran : IVeriAktaran
     {
         private readonly IDatabaseProxy _dbProxy;
         private readonly IAktarimScope _aktarimScope;
@@ -16,7 +16,7 @@ namespace AdaDataSync.API
             _syncEdilecekMaxKayitSayisi = syncEdilecekMaxKayitSayisi;
         }
 
-        public void VeritabaniIslemiYap()
+        public void AktarimYap()
         {
             try
             {

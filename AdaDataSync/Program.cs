@@ -60,13 +60,13 @@ namespace AdaDataSync
 
             IAktarimScope aktarimScope = aktarimScopeHazirla();
 
-            IVeritabaniIslemYapan hedefVeritabaniGuncelleyen = new HedefVeritabaniGuncelleyen(foxproConnection, sqlConnection, aktarimScope);
+            IVeritabaniGuncelleyen hedefVeritabaniGuncelleyen = new HedefVeritabaniGuncelleyen(foxproConnection, sqlConnection, aktarimScope);
             ITekConnectionVeriIslemleri tviKaynak = new TemelVeriIslemleri(VeritabaniTipi.FoxPro, kaynakBaglanti);
             ITekConnectionVeriIslemleri tviHedef = new TemelVeriIslemleri(VeritabaniTipi.SqlServer, hedefBaglanti);
             ILogger logger = new TextDosyasiLogger("log_" + logDosyaNo + ".txt");
             IDatabaseProxy dp = new DatabaseProxy(tviKaynak, tviHedef, logger);
 
-            IVeritabaniIslemYapan veriAktaran = new VeriAktaran(dp, aktarimScope);
+            IVeriAktaran veriAktaran = new VeriAktaran(dp, aktarimScope);
             IDataSyncService retVal = new DataSyncService(hedefVeritabaniGuncelleyen, veriAktaran);
             return retVal;
         }

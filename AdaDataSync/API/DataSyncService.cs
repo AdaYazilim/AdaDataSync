@@ -2,10 +2,10 @@
 {
     public class DataSyncService : IDataSyncService
     {
-        private readonly IVeritabaniIslemYapan _dataDefinitionGuncelleyen;
-        private readonly IVeritabaniIslemYapan _veriAktaran;
+        private readonly IVeritabaniGuncelleyen _dataDefinitionGuncelleyen;
+        private readonly IVeriAktaran _veriAktaran;
 
-        public DataSyncService(IVeritabaniIslemYapan dataDefinitionGuncelleyen, IVeritabaniIslemYapan veriAktaran)
+        public DataSyncService(IVeritabaniGuncelleyen dataDefinitionGuncelleyen, IVeriAktaran veriAktaran)
         {
             _dataDefinitionGuncelleyen = dataDefinitionGuncelleyen;
             _veriAktaran = veriAktaran;
@@ -13,8 +13,8 @@
 
         public void Sync()
         {
-            _dataDefinitionGuncelleyen.VeritabaniIslemiYap();
-            _veriAktaran.VeritabaniIslemiYap();
+            _dataDefinitionGuncelleyen.Guncelle();
+            _veriAktaran.AktarimYap();
         }
     }
 }

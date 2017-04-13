@@ -8,7 +8,7 @@ using AdaPublicGenel.Cesitli;
 
 namespace AdaDataSync.API
 {
-    internal class HedefVeritabaniGuncelleyen : IVeritabaniIslemYapan
+    internal class HedefVeritabaniGuncelleyen : IVeritabaniGuncelleyen
     {
         private readonly OleDbConnection _foxproConnection;
         private readonly SqlConnection _sqlConnection;
@@ -21,7 +21,7 @@ namespace AdaDataSync.API
             _aktarimScope = aktarimScope;
         }
 		
-        public void VeritabaniIslemiYap()
+        public void Guncelle()
         {
             const string selectKomut = "select * from ddlog";
             DataTable dt = new DataTable();
