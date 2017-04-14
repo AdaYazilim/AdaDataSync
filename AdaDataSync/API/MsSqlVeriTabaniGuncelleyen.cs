@@ -1,19 +1,31 @@
 ﻿using System.Data.Common;
-using System.Data.OleDb;
 using System.Data.SqlClient;
+using AdaVeriKatmani;
 
 namespace AdaDataSync.API
 {
-    internal class MsSqlVeriTabaniGuncelleyen : HedefVeritabaniGuncelleyen
+    internal class MsSqlVeriTabaniGuncelleyen : IVeritabaniObjesiYaratan
     {
-        internal MsSqlVeriTabaniGuncelleyen(OleDbConnection foxproConnection, SqlConnection sqlConnection, IAktarimScope aktarimScope)
-            :base(foxproConnection, sqlConnection, aktarimScope)
+        private readonly string _baglantiString;
+
+        public MsSqlVeriTabaniGuncelleyen(string baglantiString)
         {
+            _baglantiString = baglantiString;
         }
 
-        protected override DbDataAdapter AdapterAl()
+        public DbConnection ConnectionYarat()
+        {
+            return new SqlConnection(_baglantiString);
+        }
+
+        public DbDataAdapter AdaptorYarat()
         {
             return new SqlDataAdapter();
+        }
+
+        public TemelVeriIslemleri TemelVeriIslemleriYarat()
+        {
+            return new TemelVeriIslemleri(VeritabaniTipi.SqlServer2, _baglantiString);
         }
     }
 }

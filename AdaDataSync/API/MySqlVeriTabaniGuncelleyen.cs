@@ -1,19 +1,31 @@
 ﻿using System.Data.Common;
-using System.Data.OleDb;
+using AdaVeriKatmani;
 using MySql.Data.MySqlClient;
 
 namespace AdaDataSync.API
 {
-    internal class MySqlVeriTabaniGuncelleyen : HedefVeritabaniGuncelleyen
+    internal class MySqlVeriTabaniGuncelleyen : IVeritabaniObjesiYaratan
     {
-        internal MySqlVeriTabaniGuncelleyen(OleDbConnection foxproConnection, MySqlConnection sqlConnection, IAktarimScope aktarimScope)
-            : base(foxproConnection, sqlConnection, aktarimScope)
+        private readonly string _baglantiString;
+
+        public MySqlVeriTabaniGuncelleyen(string baglantiString)
         {
+            _baglantiString = baglantiString;
         }
 
-        protected override DbDataAdapter AdapterAl()
+        public DbConnection ConnectionYarat()
+        {
+            return new MySqlConnection(_baglantiString);
+        }
+
+        public DbDataAdapter AdaptorYarat()
         {
             return new MySqlDataAdapter();
+        }
+
+        public TemelVeriIslemleri TemelVeriIslemleriYarat()
+        {
+            return new TemelVeriIslemleri(VeritabaniTipi.MySql, _baglantiString);
         }
     }
 }

@@ -8,21 +8,21 @@ using AdaPublicGenel.Cesitli;
 
 namespace AdaDataSync.API
 {
-    internal abstract class HedefVeritabaniGuncelleyen : IVeritabaniGuncelleyen
+    internal class HedefVeritabaniGuncelleyen : IVeritabaniGuncelleyen
     {
         private readonly OleDbConnection _foxproConnection;
+        private readonly IVeritabaniObjesiYaratan _veritabaniObjesiYaratan;
         private readonly IAktarimScope _aktarimScope;
         private readonly DbConnection _sqlConnection;
 
-        protected HedefVeritabaniGuncelleyen(OleDbConnection foxproConnection, DbConnection sqlConnection, IAktarimScope aktarimScope)
+        public HedefVeritabaniGuncelleyen(OleDbConnection foxproConnection, IVeritabaniObjesiYaratan veritabaniObjesiYaratan, IAktarimScope aktarimScope)
         {
             _foxproConnection = foxproConnection;
+            _veritabaniObjesiYaratan = veritabaniObjesiYaratan;
             _aktarimScope = aktarimScope;
-            _sqlConnection = sqlConnection;
+            _sqlConnection = veritabaniObjesiYaratan.ConnectionYarat();
         }
 
-        protected abstract DbDataAdapter AdapterAl();
-		
         public void Guncelle()
         {
             const string selectKomut = "select * from ddlog";
@@ -113,7 +113,7 @@ namespace AdaDataSync.API
             DataTable dt = new DataTable();
             try
             {
-                DbDataAdapter adapter = AdapterAl();
+                DbDataAdapter adapter = _veritabaniObjesiYaratan.AdaptorYarat();
                 adapter.SelectCommand = command;
                 adapter.Fill(dt);
 
@@ -133,7 +133,7 @@ namespace AdaDataSync.API
             DbCommand command = _sqlConnection.CreateCommand();
             command.CommandText = "select * from " + tabloAdi + " where 1=2";
             DataTable dtHedefKolonlar = new DataTable();
-            DbDataAdapter adapter = AdapterAl();
+            DbDataAdapter adapter = _veritabaniObjesiYaratan.AdaptorYarat();
             adapter.SelectCommand = command;
             adapter.Fill(dtHedefKolonlar);
             string[] hedefKolonlar = dtHedefKolonlar.Columns.Cast<DataColumn>().Select(dc => dc.ColumnName.ToLowerInvariant()).ToArray();

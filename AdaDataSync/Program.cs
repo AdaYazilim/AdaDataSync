@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Configuration;
 using System.Data.OleDb;
-using System.Data.SqlClient;
 using System.Linq;
 using AdaDataSync.API;
 using AdaVeriKatmani;
@@ -12,6 +11,7 @@ namespace AdaDataSync
     {
         const string KaynakConfigString = "KaynakBaglantiString";
         const string HedefConfigString = "HedefBaglantiString";
+        const string HedefVeritabaniTip = "HedefVeritabaniTip";
 
         private static void Main()
         {
@@ -27,9 +27,11 @@ namespace AdaDataSync
             {
                 string kaynakConfig = KaynakConfigString + i;
                 string hedefConfig = HedefConfigString + i;
+                string hedefTip = HedefVeritabaniTip + i;
 
                 string kaynakBaglanti = ConfigurationManager.AppSettings[kaynakConfig];
                 string hedefBaglanti = ConfigurationManager.AppSettings[hedefConfig];
+                string hedefVeritabaniTip = ConfigurationManager.AppSettings[hedefTip];
 
                 if (string.IsNullOrWhiteSpace(kaynakBaglanti) && string.IsNullOrWhiteSpace(hedefBaglanti))
                     break;
@@ -43,32 +45,50 @@ namespace AdaDataSync
                 int logDosyaNo = i;
 
                 IGuncellemeKontrol guncellemeKontrol = new FoxproGuncellemeKontrol(kaynakBaglanti);
-                IDataSyncService syncServis = syncServisAl(kaynakBaglanti, hedefBaglanti, logDosyaNo);
+                IDataSyncService syncServis = syncServisAl(kaynakBaglanti, hedefBaglanti, hedefVeritabaniTip, logDosyaNo);
                 ILogger safetyNetLogger = new TextDosyasiLogger(string.Format("hata_{0}.txt", i));
                 DataSyncYonetici dataSyncYonetici = new DataSyncYonetici(guncellemeKontrol, syncServis, safetyNetLogger);
-                dataSyncYonetici.KritikHataAtti += () => syncServisAl(kaynakBaglanti, hedefBaglanti, logDosyaNo);
+                dataSyncYonetici.KritikHataAtti += () => syncServisAl(kaynakBaglanti, hedefBaglanti, hedefVeritabaniTip, logDosyaNo);
 
                 yield return dataSyncYonetici;
             }
 
         }
 
-        private static IDataSyncService syncServisAl(string kaynakBaglanti, string hedefBaglanti, int logDosyaNo)
+        private static IDataSyncService syncServisAl(string kaynakBaglanti, string hedefBaglanti, string hedefVeritabaniTipi, int logDosyaNo)
         {
             OleDbConnection foxproConnection = new OleDbConnection(kaynakBaglanti);
-            SqlConnection sqlConnection = new SqlConnection(hedefBaglanti);
+            //SqlConnection sqlConnection = new SqlConnection(hedefBaglanti);
+            IVeritabaniObjesiYaratan veritabaniObjesiYaratan = veritabaniObjesiYaratanAl(hedefBaglanti, hedefVeritabaniTipi);
 
             IAktarimScope aktarimScope = aktarimScopeHazirla();
 
-            IVeritabaniGuncelleyen hedefVeritabaniGuncelleyen = new MsSqlVeriTabaniGuncelleyen(foxproConnection, sqlConnection, aktarimScope);
+            IVeritabaniGuncelleyen hedefVeritabaniGuncelleyen = new HedefVeritabaniGuncelleyen(foxproConnection, veritabaniObjesiYaratan, aktarimScope);
             ITekConnectionVeriIslemleri tviKaynak = new TemelVeriIslemleri(VeritabaniTipi.FoxPro, kaynakBaglanti);
-            ITekConnectionVeriIslemleri tviHedef = new TemelVeriIslemleri(VeritabaniTipi.SqlServer, hedefBaglanti);
+            //ITekConnectionVeriIslemleri tviHedef = new TemelVeriIslemleri(VeritabaniTipi.SqlServer, hedefBaglanti);
+            ITekConnectionVeriIslemleri tviHedef = veritabaniObjesiYaratan.TemelVeriIslemleriYarat();
             ILogger logger = new TextDosyasiLogger("log_" + logDosyaNo + ".txt");
             IDatabaseProxy dp = new DatabaseProxy(tviKaynak, tviHedef, logger);
 
             IVeriAktaran veriAktaran = new VeriAktaran(dp, aktarimScope);
             IDataSyncService retVal = new DataSyncService(hedefVeritabaniGuncelleyen, veriAktaran);
             return retVal;
+        }
+
+        private static IVeritabaniObjesiYaratan veritabaniObjesiYaratanAl(string hedefBaglanti, string hedefVeritabaniTipi)
+        {
+            if (string.IsNullOrWhiteSpace(hedefVeritabaniTipi))
+                return new MsSqlVeriTabaniGuncelleyen(hedefBaglanti);
+
+            hedefVeritabaniTipi = hedefVeritabaniTipi.Trim().ToLowerInvariant();
+
+            switch (hedefVeritabaniTipi)
+            {
+                case "mysql":
+                    return new MySqlVeriTabaniGuncelleyen(hedefBaglanti);
+                default:
+                    return new MsSqlVeriTabaniGuncelleyen(hedefBaglanti);
+            }
         }
 
         private static IAktarimScope aktarimScopeHazirla()

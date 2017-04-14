@@ -59,8 +59,10 @@
     <Compile Include="API\IAktarimScope.cs" />
     <Compile Include="API\IDataSyncService.cs" />
     <Compile Include="API\IGuncellemeKontrol.cs" />
-    <Compile Include="API\IIslemYapan.cs" />
+    <Compile Include="API\IVeriAktaran.cs" />
     <Compile Include="API\ILogger.cs" />
+    <Compile Include="API\IVeritabaniGuncelleyen.cs" />
+    <Compile Include="API\IVeritabaniObjesiYaratan.cs" />
     <Compile Include="API\MsSqlVeriTabaniGuncelleyen.cs" />
     <Compile Include="API\MySqlVeriTabaniGuncelleyen.cs" />
     <Compile Include="API\SafetyNetLogger.cs" />
