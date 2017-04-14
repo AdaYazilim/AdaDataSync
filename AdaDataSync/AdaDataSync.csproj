@@ -38,6 +38,7 @@
     <Reference Include="AdaVeriKatmani">
       <HintPath>..\..\__OutputDLL\AdaVeriKatmani.dll</HintPath>
     </Reference>
+    <Reference Include="MySql.Data, Version=6.9.9.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL" />
     <Reference Include="NSubstitute">
       <HintPath>..\..\__GerekliDLL\NSubstitute.dll</HintPath>
     </Reference>
@@ -60,6 +61,8 @@
     <Compile Include="API\IGuncellemeKontrol.cs" />
     <Compile Include="API\IIslemYapan.cs" />
     <Compile Include="API\ILogger.cs" />
+    <Compile Include="API\MsSqlVeriTabaniGuncelleyen.cs" />
+    <Compile Include="API\MySqlVeriTabaniGuncelleyen.cs" />
     <Compile Include="API\SafetyNetLogger.cs" />
     <Compile Include="API\CalisanServisKontrolcusu.cs" />
     <Compile Include="API\VeriAktaran.cs" />

@@ -1,25 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.Common;
 using System.Data.OleDb;
-using System.Data.SqlClient;
 using System.Linq;
 using AdaPublicGenel.Cesitli;
 
 namespace AdaDataSync.API
 {
-    internal class HedefVeritabaniGuncelleyen : IVeritabaniGuncelleyen
+    internal abstract class HedefVeritabaniGuncelleyen : IVeritabaniGuncelleyen
     {
         private readonly OleDbConnection _foxproConnection;
-        private readonly SqlConnection _sqlConnection;
         private readonly IAktarimScope _aktarimScope;
+        private readonly DbConnection _sqlConnection;
 
-        public HedefVeritabaniGuncelleyen(OleDbConnection foxproConnection, SqlConnection sqlConnection, IAktarimScope aktarimScope)
+        protected HedefVeritabaniGuncelleyen(OleDbConnection foxproConnection, DbConnection sqlConnection, IAktarimScope aktarimScope)
         {
             _foxproConnection = foxproConnection;
-            _sqlConnection = sqlConnection;
             _aktarimScope = aktarimScope;
+            _sqlConnection = sqlConnection;
         }
+
+        protected abstract DbDataAdapter AdapterAl();
 		
         public void Guncelle()
         {
@@ -106,12 +108,15 @@ namespace AdaDataSync.API
 
         private bool hedefteTabloVarMi(string tabloAdi)
         {
-            SqlCommand command = _sqlConnection.CreateCommand();
+            DbCommand command = _sqlConnection.CreateCommand();
             command.CommandText = "select * from " + tabloAdi + " where 1=2";
             DataTable dt = new DataTable();
             try
             {
-                new SqlDataAdapter(command).Fill(dt);
+                DbDataAdapter adapter = AdapterAl();
+                adapter.SelectCommand = command;
+                adapter.Fill(dt);
+
                 return true;
             }
             catch (Exception)
@@ -125,10 +130,12 @@ namespace AdaDataSync.API
             if (string.IsNullOrWhiteSpace(ddi.DegisenAlanAdi))
                 return;
 
-            SqlCommand command = _sqlConnection.CreateCommand();
+            DbCommand command = _sqlConnection.CreateCommand();
             command.CommandText = "select * from " + tabloAdi + " where 1=2";
             DataTable dtHedefKolonlar = new DataTable();
-            new SqlDataAdapter(command).Fill(dtHedefKolonlar);
+            DbDataAdapter adapter = AdapterAl();
+            adapter.SelectCommand = command;
+            adapter.Fill(dtHedefKolonlar);
             string[] hedefKolonlar = dtHedefKolonlar.Columns.Cast<DataColumn>().Select(dc => dc.ColumnName.ToLowerInvariant()).ToArray();
             tabloAlaniniGuncelle(ddi, kaynakTabloKolonlari, hedefKolonlar);
         }
@@ -145,7 +152,7 @@ namespace AdaDataSync.API
 
             kolonlarKomutString = kolonlarKomutString.Substring(1);
             string komut = "create table " + tabloAdi + " (" + kolonlarKomutString + ");";
-            SqlCommand command = _sqlConnection.CreateCommand();
+            DbCommand command = _sqlConnection.CreateCommand();
             command.CommandText = komut;
             command.ExecuteNonQuery();
         }
@@ -175,7 +182,7 @@ namespace AdaDataSync.API
                     komut = "alter table " + ddi.TabloAdi + " add " + ddi.DegisenAlanAdi + " " + kolonTipi;
             }
 
-            SqlCommand command = _sqlConnection.CreateCommand();
+            DbCommand command = _sqlConnection.CreateCommand();
             command.CommandTimeout = 180;
             command.CommandText = komut;
             command.ExecuteNonQuery();
@@ -201,75 +208,6 @@ namespace AdaDataSync.API
         {
             // buradaki kodu adapublice aldım. Toplu aktarım programında da kullanılıyor.
             return FoxproAlanTipindenSqlAlanTipiYaratan.SqlKolonTipiniAl(drKolon, false, ref tablodaPrimaryKeyVar);
-
-            //string retVal;
-
-            //if (drKolon["DATA_TYPE"].ToString() == "3") //int
-            //{
-            //    bool columnHasDefault = (bool)drKolon["COLUMN_HASDEFAULT"];
-            //    if (columnHasDefault && !tablodaPrimaryKeyVar)
-            //    //if (columnHasDefault)
-            //    {
-            //        tablodaPrimaryKeyVar = true;
-            //        retVal = "[int] PRIMARY KEY";
-            //    }
-            //    else
-            //    {
-            //        retVal = "[int]";
-            //    }
-            //}
-            //else if (drKolon["DATA_TYPE"].ToString() == "129" && drKolon["CHARACTER_MAXIMUM_LENGTH"].ToInt() < 5000) //string
-            //    retVal = "[varchar] (" + drKolon["CHARACTER_MAXIMUM_LENGTH"] + ")";
-            //else if (drKolon["DATA_TYPE"].ToString() == "129") //string
-            //    retVal = "[text]";
-            //else if (drKolon["DATA_TYPE"].ToString() == "5") //double  todo: burası problemli
-            //{
-            //    //int prec = Araclar.ParseInt(drKolon["NUMERIC_PRECISION"].ToString());
-            //    //int scal = Araclar.ParseInt(drKolon["NUMERIC_SCALE"].ToString());
-            //    //if (scal == 0)
-            //    //{
-            //    //    prec += 3;
-            //    //    scal = 2;
-            //    //}
-            //    //return "[decimal] (" + prec + "," + scal + ") default 0";
-
-            //    retVal = "[float]";
-            //}
-            ////return "[decimal] (18,2) default 0";
-            //else if (drKolon["DATA_TYPE"].ToString() == "131") //double
-            //{
-
-            //    int prec = drKolon["NUMERIC_PRECISION"].ToInt();
-            //    int scal = drKolon["NUMERIC_SCALE"].ToInt();
-
-            //    prec += scal + 1;  // sebebini bilmiyorum. Buraya olduğundan eksik geliyor.
-
-            //    retVal = "[decimal] (" + prec + "," + scal + ") default 0";
-            //}
-            //else if (drKolon["DATA_TYPE"].ToString() == "11") //bool
-            //{
-            //    //return "[int]";
-            //    retVal = "[bit]";
-            //}
-            //else if (drKolon["DATA_TYPE"].ToString() == "133") //tarih
-            //    retVal = "[date]";
-            //else if (drKolon["DATA_TYPE"].ToString() == "135") //tarih saat
-            //    retVal = "[datetime2]";
-            //else if (drKolon["DATA_TYPE"].ToString() == "128") //varbinary
-            //{
-            //    if (drKolon["CHARACTER_MAXIMUM_LENGTH"].ToInt() < 1500)
-            //        retVal = "[varbinary] (" + drKolon["CHARACTER_MAXIMUM_LENGTH"] + ")";
-            //    else
-            //        retVal = "[varbinary] (4000)";
-            //}
-            //else
-            //    retVal = "[nvarchar](max)";
-
-            ////bool nullable = (bool)drKolon["is_nullable"];
-            ////string nullableEklentisi = nullable ? " NULL" : " NOT NULL";
-
-            ////retVal += nullableEklentisi;
-            //return retVal;
         }
     }
 }

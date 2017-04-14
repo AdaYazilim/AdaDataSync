@@ -60,7 +60,7 @@ namespace AdaDataSync
 
             IAktarimScope aktarimScope = aktarimScopeHazirla();
 
-            IVeritabaniGuncelleyen hedefVeritabaniGuncelleyen = new HedefVeritabaniGuncelleyen(foxproConnection, sqlConnection, aktarimScope);
+            IVeritabaniGuncelleyen hedefVeritabaniGuncelleyen = new MsSqlVeriTabaniGuncelleyen(foxproConnection, sqlConnection, aktarimScope);
             ITekConnectionVeriIslemleri tviKaynak = new TemelVeriIslemleri(VeritabaniTipi.FoxPro, kaynakBaglanti);
             ITekConnectionVeriIslemleri tviHedef = new TemelVeriIslemleri(VeritabaniTipi.SqlServer, hedefBaglanti);
             ILogger logger = new TextDosyasiLogger("log_" + logDosyaNo + ".txt");
