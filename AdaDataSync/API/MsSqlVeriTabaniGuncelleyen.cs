@@ -1,5 +1,6 @@
 ﻿using System.Data.Common;
 using System.Data.SqlClient;
+using AdaDataSync.API.VeriYapisiDegistirme;
 using AdaVeriKatmani;
 
 namespace AdaDataSync.API
@@ -26,6 +27,11 @@ namespace AdaDataSync.API
         public TemelVeriIslemleri TemelVeriIslemleriYarat()
         {
             return new TemelVeriIslemleri(VeritabaniTipi.SqlServer2, _baglantiString);
+        }
+
+        public IVeriYapisiDegistiren VeriYapisiDegistirenAl()
+        {
+            return new MsSqlVeriYapisiDegistiren();
         }
     }
 }

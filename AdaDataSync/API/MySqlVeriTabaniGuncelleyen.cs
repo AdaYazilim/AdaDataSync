@@ -1,4 +1,5 @@
 ﻿using System.Data.Common;
+using AdaDataSync.API.VeriYapisiDegistirme;
 using AdaVeriKatmani;
 using MySql.Data.MySqlClient;
 
@@ -26,6 +27,11 @@ namespace AdaDataSync.API
         public TemelVeriIslemleri TemelVeriIslemleriYarat()
         {
             return new TemelVeriIslemleri(VeritabaniTipi.MySql, _baglantiString);
+        }
+
+        public IVeriYapisiDegistiren VeriYapisiDegistirenAl()
+        {
+            return new MySqlVeriYapisiDegistiren();
         }
     }
 }

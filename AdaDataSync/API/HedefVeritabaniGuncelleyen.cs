@@ -4,7 +4,7 @@ using System.Data;
 using System.Data.Common;
 using System.Data.OleDb;
 using System.Linq;
-using AdaPublicGenel.Cesitli;
+using AdaDataSync.API.VeriYapisiDegistirme;
 
 namespace AdaDataSync.API
 {
@@ -14,6 +14,7 @@ namespace AdaDataSync.API
         private readonly IVeritabaniObjesiYaratan _veritabaniObjesiYaratan;
         private readonly IAktarimScope _aktarimScope;
         private readonly DbConnection _sqlConnection;
+        private readonly IVeriYapisiDegistiren _veriYapisiDegistiren;
 
         public HedefVeritabaniGuncelleyen(OleDbConnection foxproConnection, IVeritabaniObjesiYaratan veritabaniObjesiYaratan, IAktarimScope aktarimScope)
         {
@@ -21,6 +22,7 @@ namespace AdaDataSync.API
             _veritabaniObjesiYaratan = veritabaniObjesiYaratan;
             _aktarimScope = aktarimScope;
             _sqlConnection = veritabaniObjesiYaratan.ConnectionYarat();
+            _veriYapisiDegistiren = veritabaniObjesiYaratan.VeriYapisiDegistirenAl();
         }
 
         public void Guncelle()
@@ -147,7 +149,9 @@ namespace AdaDataSync.API
             foreach (DataRow drKolon in tabloKolonlari)
             {
                 string kolonAdi = drKolon["column_name"].ToString().Trim();
-                kolonlarKomutString += ",[" + kolonAdi + "] " + kolonTipiniAl(drKolon, ref primaryKeyEklendi);
+                //kolonlarKomutString += ",[" + kolonAdi + "] " + kolonTipiniAl(drKolon, ref primaryKeyEklendi);
+                //kolonlarKomutString += ",[" + kolonAdi + "] " + _veriYapisiDegistiren.KolonTipiniAl(drKolon, ref primaryKeyEklendi);
+                kolonlarKomutString += "," + kolonAdi + " " + _veriYapisiDegistiren.KolonTipiniAl(drKolon, ref primaryKeyEklendi);
             }
 
             kolonlarKomutString = kolonlarKomutString.Substring(1);
@@ -169,17 +173,25 @@ namespace AdaDataSync.API
                     return;
                 }
 
-                komut = "alter table " + ddi.TabloAdi + " drop column " + ddi.DegisenAlanAdi;
+                //komut = "alter table " + ddi.TabloAdi + " drop column " + ddi.DegisenAlanAdi;
+                komut = _veriYapisiDegistiren.KolonSilmeKomutunuAl(ddi.TabloAdi, ddi.DegisenAlanAdi);
             }
             else
             {
                 bool tablodaPrimaryKeyVar = true;
-                string kolonTipi = kolonTipiniAl(ilgiliKolonBilgisi, ref tablodaPrimaryKeyVar);
+                //string kolonTipi = kolonTipiniAl(ilgiliKolonBilgisi, ref tablodaPrimaryKeyVar);
+                string kolonTipi = _veriYapisiDegistiren.KolonTipiniAl(ilgiliKolonBilgisi, ref tablodaPrimaryKeyVar);
 
-                if(hedefKolonlar.Contains(ddi.DegisenAlanAdi.ToLowerInvariant()))   // kolon zaten varsa
-                    komut = "alter table " + ddi.TabloAdi + " alter column " + ddi.DegisenAlanAdi + " " + kolonTipi;
+                if (hedefKolonlar.Contains(ddi.DegisenAlanAdi.ToLowerInvariant())) // kolon zaten varsa
+                {
+                    //komut = "alter table " + ddi.TabloAdi + " alter column " + ddi.DegisenAlanAdi + " " + kolonTipi;
+                    komut = _veriYapisiDegistiren.KolonTipiDegistirmeKomutunuAl(ddi.TabloAdi, ddi.DegisenAlanAdi, kolonTipi);
+                }
                 else
-                    komut = "alter table " + ddi.TabloAdi + " add " + ddi.DegisenAlanAdi + " " + kolonTipi;
+                {
+                    //komut = "alter table " + ddi.TabloAdi + " add " + ddi.DegisenAlanAdi + " " + kolonTipi;
+                    komut = _veriYapisiDegistiren.KolonEklemeKomutunuAl(ddi.TabloAdi, ddi.DegisenAlanAdi, kolonTipi);
+                }
             }
 
             DbCommand command = _sqlConnection.CreateCommand();
@@ -204,10 +216,10 @@ namespace AdaDataSync.API
             command.ExecuteNonQuery();
         }
 
-        private string kolonTipiniAl(DataRow drKolon, ref bool tablodaPrimaryKeyVar)
-        {
-            // buradaki kodu adapublice aldım. Toplu aktarım programında da kullanılıyor.
-            return FoxproAlanTipindenSqlAlanTipiYaratan.SqlKolonTipiniAl(drKolon, false, ref tablodaPrimaryKeyVar);
-        }
+        //private string kolonTipiniAl(DataRow drKolon, ref bool tablodaPrimaryKeyVar)
+        //{
+        //    // buradaki kodu adapublice aldım. Toplu aktarım programında da kullanılıyor.
+        //    return FoxproAlanTipindenSqlAlanTipiYaratan.SqlKolonTipiniAl(drKolon, false, ref tablodaPrimaryKeyVar);
+        //}
     }
 }

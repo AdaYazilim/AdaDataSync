@@ -1,4 +1,5 @@
 ﻿using System.Data.Common;
+using AdaDataSync.API.VeriYapisiDegistirme;
 using AdaVeriKatmani;
 
 namespace AdaDataSync.API
@@ -8,5 +9,6 @@ namespace AdaDataSync.API
         DbConnection ConnectionYarat();
         DbDataAdapter AdaptorYarat();
         TemelVeriIslemleri TemelVeriIslemleriYarat();
+        IVeriYapisiDegistiren VeriYapisiDegistirenAl();
     }
 }
