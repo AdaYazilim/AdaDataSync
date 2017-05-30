@@ -58,7 +58,6 @@
   <ItemGroup>
     <Compile Include="API\DataDefinitionInfo.cs" />
     <Compile Include="API\DataSyncService.cs" />
-    <Compile Include="API\EPosta.cs" />
     <Compile Include="API\GuncellemeKontrol.cs" />
     <Compile Include="API\IAktarimScope.cs" />
     <Compile Include="API\IDataSyncService.cs" />
@@ -80,7 +79,6 @@
     <Compile Include="Test\DataSyncYoneticiTest.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Test\EpostaTest.cs" />
     <Compile Include="Test\VeriAktaranTest.cs" />
     <Compile Include="API\DataTransactionInfo.cs" />
     <Compile Include="API\ICalisanServisKontrolcusu.cs" />
