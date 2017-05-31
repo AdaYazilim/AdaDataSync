@@ -33,7 +33,7 @@ namespace AdaDataSync.API
 
                         if (_aktarimScope.TabloAktarimaDahil(logKaydi.TabloAdi))
                         {
-                            if (logKaydi.TabloAdi != "ddlog" && logKaydi.TabloAdi != "w_exists_tbl")
+                            if (logKaydi.TabloAdi != "ddlog" && logKaydi.TabloAdi != "w_exists_tbl" && !logKaydi.TabloAdi.StartsWith("ia_"))
                             {
                                 tekLogKaydiniIsle(logKaydi);
                                 _dbProxy.LogKaydiniSqleAktar(logKaydi);
