@@ -7,6 +7,7 @@ namespace AdaDataSync.API
     {
         private readonly string _dosyaAdresi;
         private string _sonLogMesaji = string.Empty;
+        private bool _sonLogAyni = false;
 
         public TextDosyasiLogger(string dosyaAdresi)
         {
@@ -19,12 +20,21 @@ namespace AdaDataSync.API
             {
                 if (logMesaji == _sonLogMesaji) // belli bir hatayı her seferinde atmaya başladığında hata.txt dosyası büyüyor. 
                 {
-                    sw.WriteLine(DateTime.Now.ToString() + " / Aynısı");
+                    if (_sonLogAyni)
+                    {
+                        sw.Write("-"+DateTime.Now.ToString() + "-");
+                    }
+                    else
+                    {
+                        sw.WriteLine("Aynı ->"+DateTime.Now.ToString() +"-");
+                        _sonLogAyni = true;
+                    }
                 }
                 else
                 {
                     sw.WriteLine(DateTime.Now.ToString() + " / " + logMesaji);
                     _sonLogMesaji = logMesaji;
+                    _sonLogAyni = false;
                 }
             }
         }

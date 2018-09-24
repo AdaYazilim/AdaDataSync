@@ -161,43 +161,86 @@ namespace AdaDataSync.API
             command.ExecuteNonQuery();
         }
 
-        private void tabloAlaniniGuncelle(DataDefinitionInfo ddi, DataRow[] kaynakTabloKolonlari, string[] hedefKolonlar)
+        private void tabloAlaniniGuncelle(DataDefinitionInfo ddi, DataRow[] kaynakTabloKolonlari, string[] hedefKolonlar, bool tekrarDeneniyor = false)
         {
-            DataRow ilgiliKolonBilgisi = kaynakTabloKolonlari.SingleOrDefault(dr => string.Equals(dr["column_name"].ToString().Trim(), ddi.DegisenAlanAdi, StringComparison.InvariantCultureIgnoreCase));
-
-            string komut;
-            if (ilgiliKolonBilgisi == null) // Kolon kaynak tabloda yok. Yani silinmiş.
+            string komut = "";
+            try
             {
-                if (!hedefKolonlar.Contains(ddi.DegisenAlanAdi.ToLowerInvariant())) // kolon zaten yoksa birşey yapma
+                DataRow ilgiliKolonBilgisi = kaynakTabloKolonlari.SingleOrDefault(dr => string.Equals(dr["column_name"].ToString().Trim(), ddi.DegisenAlanAdi, StringComparison.InvariantCultureIgnoreCase));
+                
+                if (ilgiliKolonBilgisi == null) // Kolon kaynak tabloda yok. Yani silinmiş.
                 {
-                    return;
-                }
+                    if (!hedefKolonlar.Contains(ddi.DegisenAlanAdi.ToLowerInvariant())) // kolon zaten yoksa birşey yapma
+                    {
+                        return;
+                    }
 
-                //komut = "alter table " + ddi.TabloAdi + " drop column " + ddi.DegisenAlanAdi;
-                komut = _veriYapisiDegistiren.KolonSilmeKomutunuAl(ddi.TabloAdi, ddi.DegisenAlanAdi);
-            }
-            else
-            {
-                bool tablodaPrimaryKeyVar = true;
-                //string kolonTipi = kolonTipiniAl(ilgiliKolonBilgisi, ref tablodaPrimaryKeyVar);
-                string kolonTipi = _veriYapisiDegistiren.KolonTipiniAl(ilgiliKolonBilgisi, ref tablodaPrimaryKeyVar);
-
-                if (hedefKolonlar.Contains(ddi.DegisenAlanAdi.ToLowerInvariant())) // kolon zaten varsa
-                {
-                    //komut = "alter table " + ddi.TabloAdi + " alter column " + ddi.DegisenAlanAdi + " " + kolonTipi;
-                    komut = _veriYapisiDegistiren.KolonTipiDegistirmeKomutunuAl(ddi.TabloAdi, ddi.DegisenAlanAdi, kolonTipi);
+                    //komut = "alter table " + ddi.TabloAdi + " drop column " + ddi.DegisenAlanAdi;
+                    komut = _veriYapisiDegistiren.KolonSilmeKomutunuAl(ddi.TabloAdi, ddi.DegisenAlanAdi);
                 }
                 else
                 {
-                    //komut = "alter table " + ddi.TabloAdi + " add " + ddi.DegisenAlanAdi + " " + kolonTipi;
-                    komut = _veriYapisiDegistiren.KolonEklemeKomutunuAl(ddi.TabloAdi, ddi.DegisenAlanAdi, kolonTipi);
+                    bool tablodaPrimaryKeyVar = true;
+                    //string kolonTipi = kolonTipiniAl(ilgiliKolonBilgisi, ref tablodaPrimaryKeyVar);
+                    string kolonTipi = _veriYapisiDegistiren.KolonTipiniAl(ilgiliKolonBilgisi, ref tablodaPrimaryKeyVar);
+
+                    if (hedefKolonlar.Contains(ddi.DegisenAlanAdi.ToLowerInvariant())) // kolon zaten varsa
+                    {
+                        //komut = "alter table " + ddi.TabloAdi + " alter column " + ddi.DegisenAlanAdi + " " + kolonTipi;
+                        komut = _veriYapisiDegistiren.KolonTipiDegistirmeKomutunuAl(ddi.TabloAdi, ddi.DegisenAlanAdi, kolonTipi);
+                    }
+                    else
+                    {
+                        //komut = "alter table " + ddi.TabloAdi + " add " + ddi.DegisenAlanAdi + " " + kolonTipi;
+                        komut = _veriYapisiDegistiren.KolonEklemeKomutunuAl(ddi.TabloAdi, ddi.DegisenAlanAdi, kolonTipi);
+                    }
+                }
+
+                DbCommand command = _sqlConnection.CreateCommand();
+                command.CommandTimeout = 180;
+                command.CommandText = komut;
+                command.ExecuteNonQuery();
+
+            }
+            catch (Exception ex)
+            {
+                if (!tekrarDeneniyor && ex.Message.Contains("The index") && ex.Message.Contains("is dependent on column") && ex.Message.Contains("failed because one or more objects access this column"))
+                {
+                    /*
+                        The index 'POL___ffrksir__asc' is dependent on column 'ffrksir'.
+                        ALTER TABLE ALTER COLUMN ffrksir failed because one or more objects access this column.
+                    */
+
+                    string firsKey = "The index";
+                    string afterKey = "is dependent on column";
+                    var startIndex = ex.Message.IndexOf(firsKey);
+                    var endIndex = ex.Message.IndexOf(afterKey);
+                    if (startIndex > -1 && endIndex > -1)
+                    {
+                        var indexAdi = ex.Message.Substring(startIndex + firsKey.Length, endIndex - (startIndex + firsKey.Length)).Trim(' ','\'');
+                        var tabloIndex = indexAdi.IndexOf("___");
+                        if (tabloIndex > -1)
+                        {
+                           var tabloAdi = indexAdi.Substring(0, tabloIndex);
+                            DbCommand iCommand = _sqlConnection.CreateCommand();
+                            iCommand.CommandTimeout = 180;
+                            iCommand.CommandText = _veriYapisiDegistiren.IndexSilmeKomutunuAl(tabloAdi, indexAdi);
+                            iCommand.ExecuteNonQuery();
+                        }
+                    }
+
+                    tabloAlaniniGuncelle(ddi, kaynakTabloKolonlari, hedefKolonlar, true);
+                }
+                else if (ex.Message.Contains("Arithmetic overflow error converting expression to data type int"))
+                {
+                    //foxproda numericden inte dönüşümde bu hatayı veriyordu o yüzdfen yok sayılmasını sağlıyoruz.
+                }
+                else
+                {
+                    throw new Exception(komut + "=>" + ex.Message);
                 }
             }
-
-            DbCommand command = _sqlConnection.CreateCommand();
-            command.CommandTimeout = 180;
-            command.CommandText = komut;
-            command.ExecuteNonQuery();
+            
         }
 
         private void ddlogKayitlariniSil(IEnumerable<DataDefinitionInfo> ddiler)
